@@ -28,6 +28,8 @@ unsigned int maxSmallRectWidth = 0;
 unsigned int maxSmallRectHeight = 0;
 unsigned long minEnclosingArea = 0;
 unsigned long maxEnclosingArea = 0;
+unsigned int maxEnclosingWidth = 0;
+unsigned int maxEnclosingHeight = 0;
 
 unsigned long best_rects_size = 0;
 vector<Rect> best_rects;
@@ -49,15 +51,32 @@ void calculateBoundaries(vector<RectSize> rects) {
 	best_rects_size = maxEnclosingArea;
 }
 
+/// Round up to next higher power of 2 (return x if it's already a power
+/// of 2).
+inline int
+pow2roundup (int x)
+{
+    if (x < 0)
+        return 0;
+    --x;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return x+1;
+}
+
+
 struct WorkerJob {
 	vector<RectSize> *passed_rects;
-	unsigned long area;
 	unsigned int w;
+	unsigned int h;
 	sem_t *postOnFound;
-	WorkerJob(vector<RectSize> *passed_rects_, unsigned long area_, unsigned int w_, sem_t *postOnFound_) {
+	WorkerJob(vector<RectSize> *passed_rects_, unsigned int w_, unsigned int h_, sem_t *postOnFound_) {
 		passed_rects = passed_rects_;
-		area = area_;
 		w = w_;
+		h = h_;
 		postOnFound = postOnFound_;
 	}
 };
@@ -69,9 +88,7 @@ void checkArea(void *args)
 		MaxRectsBinPack bin;
 		vector<Rect> returnrects;
 		vector<RectSize> rects(*(job->passed_rects));
-		unsigned h = job->area/job->w;
-
-		bin.Init(job->w, h);
+		bin.Init(job->w, job->h);
 		MaxRectsBinPack::FreeRectChoiceHeuristic heuristic = MaxRectsBinPack::RectBestShortSideFit;
 		bin.Insert(rects, returnrects, heuristic);
 
@@ -85,14 +102,33 @@ void checkArea(void *args)
 				}
 				sem_post(&best_rects_mutex);
 			}
-			sem_post(job->postOnFound);
+			if (job->postOnFound) sem_post(job->postOnFound);
 		}
 		delete job;
 	}
 	pthread_exit(0);
 }
 
-bool checkAreaSize(vector<RectSize> &passed_rects, unsigned long area, bool quitEarly, int maxTries = 0) {
+bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area) {
+	// returns true if a fit was found
+	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void* (*)(void*)>(&checkArea));
+
+	sem_t fitFounds;
+	sem_init(&fitFounds, 0, 0);
+
+	for (unsigned int w = maxSmallRectWidth, end = maxEnclosingWidth; w < end; w++) {
+		unsigned int h = min(static_cast<unsigned int>(area/w), maxEnclosingHeight);
+		assert (w <= maxEnclosingWidth || h <= maxEnclosingHeight);
+		WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds);
+		workDispatcher->addJob(t);
+	}
+
+	delete workDispatcher;
+
+	return !sem_trywait(&fitFounds);
+}
+
+bool checkAreaSizeFast(vector<RectSize> &passed_rects, unsigned long area, int maxTries = 0) {
 	// returns true if a fit was found
 	bool foundFit = false;
 	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void* (*)(void*)>(&checkArea));
@@ -100,33 +136,22 @@ bool checkAreaSize(vector<RectSize> &passed_rects, unsigned long area, bool quit
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
 
-	if (maxTries) {
-		int yetToStart = maxTries;
-		while (yetToStart > 0) {
+	int yetToStart = maxTries;
+	while (yetToStart > 0) {
+		int minWidth = maxSmallRectWidth;
+		int maxWidth = maxEnclosingWidth;
+		unsigned int w = minWidth + rand() % (maxWidth - minWidth);
+		unsigned int h = std::min(static_cast<unsigned int>(area/w), maxEnclosingHeight);
 
-			unsigned w = maxSmallRectWidth + rand() % area/maxSmallRectHeight;
+		assert(w <= maxEnclosingWidth && h <= maxEnclosingHeight);
 
-			WorkerJob *t = new WorkerJob(&passed_rects, area, w, &fitFounds);
-			workDispatcher->addJob(t);
-			yetToStart--;
+		WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds);
+		workDispatcher->addJob(t);
+		yetToStart--;
 
-			if (!foundFit && !sem_trywait(&fitFounds))
-				foundFit = true;
-
-			if (quitEarly && foundFit)
-				yetToStart = 0;
-		}
-
-	} else {
-		for (unsigned int w = maxSmallRectWidth, end = area/maxSmallRectWidth; w < end; w++) {
-			WorkerJob *t = new WorkerJob(&passed_rects, area, w, &fitFounds);
-			workDispatcher->addJob(t);
-
-			if (!foundFit && !sem_trywait(&fitFounds))
-				foundFit = true;
-
-			if (quitEarly && foundFit)
-				w = end;
+		if (!foundFit && !sem_trywait(&fitFounds)) {
+			foundFit = true;
+			yetToStart = 0;
 		}
 	}
 
@@ -138,13 +163,34 @@ bool checkAreaSize(vector<RectSize> &passed_rects, unsigned long area, bool quit
 	return foundFit;
 }
 
+void checkAreaSizePowersOf2(vector<RectSize> &passed_rects) {
+	// returns true if a fit was found
+	bool foundFit = false;
+	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void* (*)(void*)>(&checkArea));
+
+	sem_t fitFounds;
+	sem_init(&fitFounds, 0, 0);
+
+	for (unsigned int w = pow2roundup(maxSmallRectWidth); w <= maxEnclosingArea/maxSmallRectHeight; w*=2) {
+		for (unsigned int h = pow2roundup(maxSmallRectHeight); h <= maxEnclosingArea/maxSmallRectWidth; h*=2) {
+			if ( w * h < minEnclosingArea) continue;
+			WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds);
+			workDispatcher->addJob(t);
+		}
+	}
+
+	delete workDispatcher;
+	maxEnclosingHeight = enclosingRectHeight(best_rects);
+	maxEnclosingWidth = enclosingRectWidth(best_rects);
+}
+
 void binarySearch(vector<RectSize> &rects) {
-	unsigned long  upper = maxEnclosingArea;
-	unsigned long  lower = minEnclosingArea;
+	unsigned long upper = min((unsigned long )(maxEnclosingWidth * maxEnclosingHeight),(unsigned long)maxEnclosingArea);
+	unsigned long lower = minEnclosingArea;
 
 	while (upper - lower > 1) {
 		unsigned long middle = (upper + lower) / 2;
-		if (checkAreaSize(rects, middle, true, 1024))
+		if (checkAreaSizeFast(rects, middle, 1024))
 			upper = best_rects_size;
 		else
 			lower = middle;
@@ -153,7 +199,7 @@ void binarySearch(vector<RectSize> &rects) {
 
 void linearSearch(vector<RectSize> &rects) {
 	do {
-	} while (checkAreaSize(rects, best_rects_size - 1, false));
+	} while (checkAreaSizeExhaustive(rects, best_rects_size - 1));
 }
 
 int main(int argc, char **argv)
@@ -183,6 +229,7 @@ int main(int argc, char **argv)
 	}
 
 	calculateBoundaries(rects);
+	checkAreaSizePowersOf2(rects);
 	binarySearch(rects);
 	linearSearch(rects);
 
