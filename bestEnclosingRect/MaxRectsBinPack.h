@@ -6,12 +6,13 @@
 	This work is released to Public Domain, do whatever you want with it.
 */
 #pragma once
-
+#ifndef __MAXRECTSBINPACK__
+#define __MAXRECTSBINPACK__
 #include <vector>
 
 #include "Rect.h"
 
-/** MaxRectsBinPack implements the MAXRECTS data structure and different bin packing algorithms that 
+/** MaxRectsBinPack implements the MAXRECTS data structure and different bin packing algorithms that
 	use this structure. */
 class MaxRectsBinPack
 {
@@ -48,6 +49,10 @@ public:
 	/// Computes the ratio of used surface area to the total bin area.
 	float Occupancy() const;
 
+	unsigned usedRectWidth();
+	unsigned usedRectHeight();
+	unsigned long usedRectArea();
+
 private:
 	int binWidth;
 	int binHeight;
@@ -79,3 +84,5 @@ private:
 	/// Goes through the free rectangle list and removes any redundant entries.
 	void PruneFreeList();
 };
+
+#endif
