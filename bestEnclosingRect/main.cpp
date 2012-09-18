@@ -24,10 +24,10 @@ using namespace std;
 
 bool compareRectIds (Rect i, Rect j) { return (i.id < j.id); }
 
-unsigned int minimumWidth = 0;
-unsigned int minimumHeight = 0;
-unsigned long minimumArea = 0;
-unsigned long maximumArea = 0;
+unsigned int maxSmallRectWidth = 0;
+unsigned int maxSmallRectHeight = 0;
+unsigned long minEnclosingArea = 0;
+unsigned long maxEnclosingArea = 0;
 
 unsigned long best_rects_size = 0;
 vector<Rect> best_rects;
@@ -36,17 +36,17 @@ sem_t best_rects_mutex;
 const int MAXTHREADS = 9;
 
 void calculateBoundaries(vector<RectSize> rects) {
-	minimumWidth = 0;
-	minimumHeight = 0;
-	minimumArea = 0;
-	maximumArea = 0;
+	maxSmallRectWidth = 0;
+	maxSmallRectHeight = 0;
+	minEnclosingArea = 0;
+	maxEnclosingArea = 0;
 	for (vector<RectSize>::iterator it = rects.begin(), end = rects.end(); it != end; it++) {
-		minimumHeight = std::max(minimumHeight, (unsigned int)it->height);
-		minimumWidth = std::max(minimumWidth, (unsigned int)it->width);
-		minimumArea += it->height*it->width;
+		maxSmallRectHeight = std::max(maxSmallRectHeight, (unsigned int)it->height);
+		maxSmallRectWidth = std::max(maxSmallRectWidth, (unsigned int)it->width);
+		minEnclosingArea += it->height*it->width;
 	}
-	maximumArea = rects.size() * minimumHeight * minimumWidth;
-	best_rects_size = maximumArea;
+	maxEnclosingArea = rects.size() * maxSmallRectHeight * maxSmallRectWidth;
+	best_rects_size = maxEnclosingArea;
 }
 
 struct WorkerJob {
@@ -104,7 +104,7 @@ bool checkAreaSize(vector<RectSize> &passed_rects, unsigned long area, bool quit
 		int yetToStart = maxTries;
 		while (yetToStart > 0) {
 
-			unsigned w = minimumWidth + rand() % area/minimumHeight;
+			unsigned w = maxSmallRectWidth + rand() % area/maxSmallRectHeight;
 
 			WorkerJob *t = new WorkerJob(&passed_rects, area, w, &fitFounds);
 			workDispatcher->addJob(t);
@@ -118,7 +118,7 @@ bool checkAreaSize(vector<RectSize> &passed_rects, unsigned long area, bool quit
 		}
 
 	} else {
-		for (unsigned int w = minimumWidth, end = area/minimumWidth; w < end; w++) {
+		for (unsigned int w = maxSmallRectWidth, end = area/maxSmallRectWidth; w < end; w++) {
 			WorkerJob *t = new WorkerJob(&passed_rects, area, w, &fitFounds);
 			workDispatcher->addJob(t);
 
@@ -139,8 +139,8 @@ bool checkAreaSize(vector<RectSize> &passed_rects, unsigned long area, bool quit
 }
 
 void binarySearch(vector<RectSize> &rects) {
-	unsigned long  upper = maximumArea;
-	unsigned long  lower = minimumArea;
+	unsigned long  upper = maxEnclosingArea;
+	unsigned long  lower = minEnclosingArea;
 
 	while (upper - lower > 1) {
 		unsigned long middle = (upper + lower) / 2;
