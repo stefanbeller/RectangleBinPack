@@ -46,19 +46,19 @@ rm ../../flare-game/mods/minicore/animations/goblin_tmp.txt
 cp ../../flare-game/mods/minicore/animations/goblin_.txt ../../flare-game/mods/minicore/animations/goblin_runner_.txt
 cp ../../flare-game/mods/minicore/animations/goblin_elite_.txt ../../flare-game/mods/minicore/animations/goblin_elite_runner_.txt
 
-linenumbers=$(cat ../../flare-game/mods/minicore/animations/goblin_.txt |grep -n "\[" |grep -A1 run |tr ":" " "|awk '{print $1}'|xargs |tr " " ",")
+linenumbers=$(cat ../../flare-game/mods/minicore/animations/goblin_.txt |grep -n "\[" |grep -A1 run |tr ":" " "|awk '{print $1-1}'|xargs |tr " " ",")
 sed "${linenumbers}d" ../../flare-game/mods/minicore/animations/goblin_.txt | sed 's,hop,run,' > ../../flare-game/mods/minicore/animations/goblin.txt
 rm ../../flare-game/mods/minicore/animations/goblin_.txt
 
-linenumbers=$(cat ../../flare-game/mods/minicore/animations/goblin_elite_.txt |grep -n "\[" |grep -A1 run |tr ":" " "|awk '{print $1}'|xargs |tr " " ",")
+linenumbers=$(cat ../../flare-game/mods/minicore/animations/goblin_elite_.txt |grep -n "\[" |grep -A1 run |tr ":" " "|awk '{print $1-1}'|xargs |tr " " ",")
 sed "${linenumbers}d" ../../flare-game/mods/minicore/animations/goblin_elite_.txt | sed 's,hop,run,' > ../../flare-game/mods/minicore/animations/goblin_elite.txt
 rm ../../flare-game/mods/minicore/animations/goblin_elite_.txt
 
-linenumbers=$(cat ../../flare-game/mods/minicore/animations/goblin_runner_.txt |grep -n "\[" |grep -A1 hop |tr ":" " "|awk '{print $1}'|xargs |tr " " ",")
+linenumbers=$(cat ../../flare-game/mods/minicore/animations/goblin_runner_.txt |grep -n "\[" |grep -A1 hop |tr ":" " "|awk '{print $1-1}'|xargs |tr " " ",")
 sed "${linenumbers}d" ../../flare-game/mods/minicore/animations/goblin_runner_.txt | sed 's,hop,run,' > ../../flare-game/mods/minicore/animations/goblin_runner.txt
 rm ../../flare-game/mods/minicore/animations/goblin_runner_.txt
 
-linenumbers=$(cat ../../flare-game/mods/minicore/animations/goblin_elite_runner_.txt |grep -n "\[" |grep -A1 hop |tr ":" " "|awk '{print $1}'|xargs |tr " " ",")
+linenumbers=$(cat ../../flare-game/mods/minicore/animations/goblin_elite_runner_.txt |grep -n "\[" |grep -A1 hop |tr ":" " "|awk '{print $1-1}'|xargs |tr " " ",")
 sed "${linenumbers}d" ../../flare-game/mods/minicore/animations/goblin_elite_runner_.txt | sed 's,hop,run,' > ../../flare-game/mods/minicore/animations/goblin_elite_runner.txt
 rm ../../flare-game/mods/minicore/animations/goblin_elite_runner_.txt
 
@@ -120,19 +120,19 @@ rm ../../flare-game/mods/fantasycore/animations/goblin_tmp.txt
 cp ../../flare-game/mods/fantasycore/animations/goblin_.txt ../../flare-game/mods/fantasycore/animations/goblin_runner_.txt
 cp ../../flare-game/mods/fantasycore/animations/goblin_elite_.txt ../../flare-game/mods/fantasycore/animations/goblin_elite_runner_.txt
 
-linenumbers=$(cat ../../flare-game/mods/fantasycore/animations/goblin_.txt |grep -n "\[" |grep -A1 run |tr ":" " "|awk '{print $1}'|xargs |tr " " ",")
+linenumbers=$(cat ../../flare-game/mods/fantasycore/animations/goblin_.txt |grep -n "\[" |grep -A1 run |tr ":" " "|awk '{print $1-1}'|xargs |tr " " ",")
 sed "${linenumbers}d" ../../flare-game/mods/fantasycore/animations/goblin_.txt | sed 's,hop,run,' > ../../flare-game/mods/fantasycore/animations/goblin.txt
 rm ../../flare-game/mods/fantasycore/animations/goblin_.txt
 
-linenumbers=$(cat ../../flare-game/mods/fantasycore/animations/goblin_elite_.txt |grep -n "\[" |grep -A1 run |tr ":" " "|awk '{print $1}'|xargs |tr " " ",")
+linenumbers=$(cat ../../flare-game/mods/fantasycore/animations/goblin_elite_.txt |grep -n "\[" |grep -A1 run |tr ":" " "|awk '{print $1-1}'|xargs |tr " " ",")
 sed "${linenumbers}d" ../../flare-game/mods/fantasycore/animations/goblin_elite_.txt | sed 's,hop,run,' > ../../flare-game/mods/fantasycore/animations/goblin_elite.txt
 rm ../../flare-game/mods/fantasycore/animations/goblin_elite_.txt
 
-linenumbers=$(cat ../../flare-game/mods/fantasycore/animations/goblin_runner_.txt |grep -n "\[" |grep -A1 hop |tr ":" " "|awk '{print $1}'|xargs |tr " " ",")
+linenumbers=$(cat ../../flare-game/mods/fantasycore/animations/goblin_runner_.txt |grep -n "\[" |grep -A1 hop |tr ":" " "|awk '{print $1-1}'|xargs |tr " " ",")
 sed "${linenumbers}d" ../../flare-game/mods/fantasycore/animations/goblin_runner_.txt | sed 's,hop,run,' > ../../flare-game/mods/fantasycore/animations/goblin_runner.txt
 rm ../../flare-game/mods/fantasycore/animations/goblin_runner_.txt
 
-linenumbers=$(cat ../../flare-game/mods/fantasycore/animations/goblin_elite_runner_.txt |grep -n "\[" |grep -A1 hop |tr ":" " "|awk '{print $1}'|xargs |tr " " ",")
+linenumbers=$(cat ../../flare-game/mods/fantasycore/animations/goblin_elite_runner_.txt |grep -n "\[" |grep -A1 hop |tr ":" " "|awk '{print $1-1}'|xargs |tr " " ",")
 sed "${linenumbers}d" ../../flare-game/mods/fantasycore/animations/goblin_elite_runner_.txt | sed 's,hop,run,' > ../../flare-game/mods/fantasycore/animations/goblin_elite_runner.txt
 rm ../../flare-game/mods/fantasycore/animations/goblin_elite_runner_.txt
 
