@@ -160,7 +160,6 @@ def findBestEnclosingRectangle(rects):
 
     tf = tempfile.mkstemp()
     string = "rectpacker " + rectPassString
-    print string
     p = subprocess.call(string, stdout = tf[0], shell = True)
 
     filehandle = open(tf[1], 'r')
