@@ -30,19 +30,25 @@ def parseAnimationFile(fname, imgname):
                 partimg = img.copy().crop(imgrect)
                 bbox = partimg.split()[partimg.getbands().index('A')].getbbox()
                 newimg = partimg.crop(bbox)
-                f = {
-                    "name" : sectionname,
-                    "type" : _type,
-                    "direction" : direction,
-                    "index" : index,
-                    "duration" : duration,
-                    "frames" : frames,
-                    "renderoffset" : (render_offset_x-bbox[0], render_offset_y-bbox[1]),
-                    "image" : newimg,
-                    "width" : newimg.size[0],
-                    "height" : newimg.size[1]
-                }
-                images += [f]
+
+                if bbox is None:
+                    print imgname
+                    print "skipping empty image at ",(x, y, w, h)
+                    print "position / direction is ",position, direction
+                else:
+                    f = {
+                        "name" : sectionname,
+                        "type" : _type,
+                        "direction" : direction,
+                        "index" : index,
+                        "duration" : duration,
+                        "frames" : frames,
+                        "renderoffset" : (render_offset_x-bbox[0], render_offset_y-bbox[1]),
+                        "image" : newimg,
+                        "width" : newimg.size[0],
+                        "height" : newimg.size[1]
+                    }
+                    images += [f]
         return images
 
 
