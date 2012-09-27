@@ -42,7 +42,7 @@ void calculateBoundaries(vector<RectSize> rects) {
 	maxSmallRectHeight = 0;
 	minEnclosingArea = 0;
 	maxEnclosingArea = 0;
-	for (vector<RectSize>::iterator it = rects.begin(), end = rects.end(); it != end; it++) {
+	for (vector<RectSize>::iterator it = rects.begin(), end = rects.end(); it != end; ++it) {
 		maxSmallRectHeight = std::max(maxSmallRectHeight, (unsigned int)it->height);
 		maxSmallRectWidth = std::max(maxSmallRectWidth, (unsigned int)it->width);
 		minEnclosingArea += it->height*it->width;
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 	linearSearch(rects);
 
 	sort(best_rects.begin(), best_rects.end(), compareRectIds);
-	for (vector<Rect>::iterator it = best_rects.begin(); it != best_rects.end(); it++) {
+	for (vector<Rect>::iterator it = best_rects.begin(); it != best_rects.end(); ++it) {
 		printf ("%d %d\n", it->x, it->y);
 	}
 	return 0;

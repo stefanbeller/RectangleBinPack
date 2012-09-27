@@ -16,14 +16,14 @@ bool IsContainedIn(const Rect &a, const Rect &b)
 
 unsigned enclosingRectWidth(const std::vector<Rect> &rects) {
 	unsigned ret = 0;
-	for (vector<Rect>::const_iterator it = rects.begin(), end = rects.end(); it != end; it++)
+	for (vector<Rect>::const_iterator it = rects.begin(), end = rects.end(); it != end; ++it)
 		ret = std::max(ret, (unsigned)(it->x + it->width));
 	return ret;
 }
 
 unsigned enclosingRectHeight(const std::vector<Rect> &rects) {
 	unsigned ret = 0;
-	for (vector<Rect>::const_iterator it = rects.begin(), end = rects.end(); it != end; it++)
+	for (vector<Rect>::const_iterator it = rects.begin(), end = rects.end(); it != end; ++it)
 		ret = std::max(ret, (unsigned)(it->y + it->height));
 	return ret;
 }
@@ -31,7 +31,7 @@ unsigned enclosingRectHeight(const std::vector<Rect> &rects) {
 unsigned long enclosingRectArea(const std::vector<Rect> &rects) {
 	unsigned w = 0;
 	unsigned h = 0;
-	for (vector<Rect>::const_iterator it = rects.begin(), end = rects.end(); it != end; it++) {
+	for (vector<Rect>::const_iterator it = rects.begin(), end = rects.end(); it != end; ++it) {
 		h = std::max(h, (unsigned)(it->y + it->height));
 		w = std::max(w, (unsigned)(it->x + it->width));
 	}
