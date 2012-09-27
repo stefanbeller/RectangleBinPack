@@ -140,7 +140,7 @@ bool checkAreaSizeFast(vector<RectSize> &passed_rects, unsigned long area, int m
 	while (yetToStart > 0) {
 		int minWidth = maxSmallRectWidth;
 		int maxWidth = maxEnclosingWidth;
-		unsigned int w = minWidth + rand() % (maxWidth - minWidth);
+		unsigned int w = minWidth + ((maxWidth - minWidth) > 0 ? rand() % (maxWidth - minWidth) : 0);
 		unsigned int h = std::min(static_cast<unsigned int>(area/w), maxEnclosingHeight);
 
 		assert(w <= maxEnclosingWidth && h <= maxEnclosingHeight);
