@@ -1,22 +1,30 @@
-
 #include "WorkDispatcher.h"
-
 #include <assert.h>
 
-WorkDispatcher::WorkDispatcher(void* workerthread(void*)) {
-	sem_init(&mutex, 0, 1);
-	sem_init(&workingcount, 0, 0);
-	sem_init(&freecount, 0, MAXTHREADS);
-	threads = new pthread_t[MAXTHREADS];
-
-	for (int i = 0; i < MAXTHREADS; i++) {
-		pthread_create(&threads[i], 0, workerthread, reinterpret_cast<void*>(this));
+void* WorkDispatcher::dispatcher(void *args) {
+	WorkDispatcher *disp = reinterpret_cast<WorkDispatcher*>(args);
+	while (void *job = disp->getTask()) {
+		disp->externcall(job);
 	}
-
+	pthread_exit(0);
 }
 
-WorkerJob *WorkDispatcher::getJob() {
-	WorkerJob *ret;
+WorkDispatcher::WorkDispatcher(void workertask(void*), const unsigned numThreads)
+ : MAX_THREADS(numThreads)
+ , externcall(workertask)
+{
+	sem_init(&mutex, 0, 1);
+	sem_init(&workingcount, 0, 0);
+	sem_init(&freecount, 0, MAX_THREADS);
+	threads = new pthread_t[MAX_THREADS];
+
+	for (unsigned i = 0; i < MAX_THREADS; i++) {
+		pthread_create(&threads[i], 0, reinterpret_cast<void* (*)(void*)>(&WorkDispatcher::dispatcher), reinterpret_cast<void*>(this));
+	}
+}
+
+void *WorkDispatcher::getTask() {
+	void *ret;
 	sem_wait(&workingcount);
 	sem_wait(&mutex);
 	sem_post(&freecount);
@@ -26,7 +34,7 @@ WorkerJob *WorkDispatcher::getJob() {
 	return ret;
 }
 
-void WorkDispatcher::addJob(WorkerJob *job) {
+void WorkDispatcher::addTask(void *job) {
 	sem_wait(&freecount);
 	sem_wait(&mutex);
 	jobs.push(job);
@@ -35,10 +43,10 @@ void WorkDispatcher::addJob(WorkerJob *job) {
 }
 
 WorkDispatcher::~WorkDispatcher() {
-	for (int i = 0; i < MAXTHREADS; i++)
-		addJob(0);
+	for (unsigned i = 0; i < MAX_THREADS; i++)
+		addTask(0);
 
-	for (int i = 0; i < MAXTHREADS; i++)
+	for (unsigned i = 0; i < MAX_THREADS; i++)
 		pthread_join(threads[i], 0);
 
 	sem_destroy(&mutex);

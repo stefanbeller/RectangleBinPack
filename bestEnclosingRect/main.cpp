@@ -83,35 +83,32 @@ struct WorkerJob {
 
 void checkArea(void *args)
 {
-	WorkDispatcher *dispatcher = reinterpret_cast<WorkDispatcher*>(args);
-	while (WorkerJob *job = dispatcher->getJob()) {
-		MaxRectsBinPack bin;
-		vector<Rect> returnrects;
-		vector<RectSize> rects(*(job->passed_rects));
-		bin.Init(job->w, job->h);
-		MaxRectsBinPack::FreeRectChoiceHeuristic heuristic = MaxRectsBinPack::RectBestShortSideFit;
-		bin.Insert(rects, returnrects, heuristic);
+	WorkerJob *job = reinterpret_cast<WorkerJob*>(args);
+	MaxRectsBinPack bin;
+	vector<Rect> returnrects;
+	vector<RectSize> rects(*(job->passed_rects));
+	bin.Init(job->w, job->h);
+	MaxRectsBinPack::FreeRectChoiceHeuristic heuristic = MaxRectsBinPack::RectBestShortSideFit;
+	bin.Insert(rects, returnrects, heuristic);
 
-		// if all rects could be inserted and we're better than before:
-		if (rects.size() == 0) {
+	// if all rects could be inserted and we're better than before:
+	if (rects.empty()) {
+		if (enclosingRectArea(returnrects) < best_rects_size) {
+			sem_wait(&best_rects_mutex);
 			if (enclosingRectArea(returnrects) < best_rects_size) {
-				sem_wait(&best_rects_mutex);
-				if (enclosingRectArea(returnrects) < best_rects_size) {
-					best_rects_size = enclosingRectArea(returnrects);
-					best_rects = returnrects;
-				}
-				sem_post(&best_rects_mutex);
+				best_rects_size = enclosingRectArea(returnrects);
+				best_rects = returnrects;
 			}
-			if (job->postOnFound) sem_post(job->postOnFound);
+			sem_post(&best_rects_mutex);
 		}
-		delete job;
+		if (job->postOnFound) sem_post(job->postOnFound);
 	}
-	pthread_exit(0);
+	delete job;
 }
 
 bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area) {
 	// returns true if a fit was found
-	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void* (*)(void*)>(&checkArea));
+	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea), MAXTHREADS);
 
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
@@ -120,7 +117,7 @@ bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area)
 		unsigned int h = min(static_cast<unsigned int>(area/w), maxEnclosingHeight);
 		assert (w <= maxEnclosingWidth || h <= maxEnclosingHeight);
 		WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds);
-		workDispatcher->addJob(t);
+		workDispatcher->addTask(t);
 	}
 
 	delete workDispatcher;
@@ -131,7 +128,7 @@ bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area)
 bool checkAreaSizeFast(vector<RectSize> &passed_rects, unsigned long area, int maxTries = 0) {
 	// returns true if a fit was found
 	bool foundFit = false;
-	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void* (*)(void*)>(&checkArea));
+	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea), MAXTHREADS);
 
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
@@ -146,7 +143,7 @@ bool checkAreaSizeFast(vector<RectSize> &passed_rects, unsigned long area, int m
 		assert(w <= maxEnclosingWidth && h <= maxEnclosingHeight);
 
 		WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds);
-		workDispatcher->addJob(t);
+		workDispatcher->addTask(t);
 		yetToStart--;
 
 		if (!foundFit && !sem_trywait(&fitFounds)) {
@@ -165,8 +162,7 @@ bool checkAreaSizeFast(vector<RectSize> &passed_rects, unsigned long area, int m
 
 void checkAreaSizePowersOf2(vector<RectSize> &passed_rects) {
 	// returns true if a fit was found
-	bool foundFit = false;
-	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void* (*)(void*)>(&checkArea));
+	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea), MAXTHREADS);
 
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
@@ -175,7 +171,7 @@ void checkAreaSizePowersOf2(vector<RectSize> &passed_rects) {
 		for (unsigned int h = pow2roundup(maxSmallRectHeight); h <= maxEnclosingArea/maxSmallRectWidth; h*=2) {
 			if ( w * h < minEnclosingArea) continue;
 			WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds);
-			workDispatcher->addJob(t);
+			workDispatcher->addTask(t);
 		}
 	}
 
