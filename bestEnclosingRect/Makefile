@@ -4,7 +4,7 @@
 
 OBJS = GuillotineBinPack.o  main.o  MaxRectsBinPack.o  Rect.o  WorkDispatcher.o
 CXX = g++
-CPPFLAGS = -O3 -g -flto
+CPPFLAGS = -O3 -g -flto -Wall
 
 LDFLAGS = -fwhole-program -pthread -lm
 
