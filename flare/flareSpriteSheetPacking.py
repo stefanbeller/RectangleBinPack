@@ -122,9 +122,10 @@ def writeAnimationfile(animname, images, additionalinformation):
         framelist = filter(lambda s: s["name"] == name, images)
         f.write("\n")
         f.write("["+name+"]\n")
-        f.write("frames="+str(framelist[0]["frames"])+"\n")
-        f.write("duration="+str(framelist[0]["duration"])+"\n")
-        f.write("type="+str(framelist[0]["type"])+"\n")
+        if len(framelist)>0:
+            f.write("frames="+str(framelist[0]["frames"])+"\n")
+            f.write("duration="+str(framelist[0]["duration"])+"\n")
+            f.write("type="+str(framelist[0]["type"])+"\n")
         for x in framelist:
             #frame=index,direction,x,y,w,h,offsetx,offsety
             f.write("frame="+str(x["index"])+","+str(x["direction"])+","+str(x["x"])+","+str(x["y"])+","+str(x["width"])+","+str(x["height"])+","+str(x["renderoffset"][0])+","+str(x["renderoffset"][1])+"\n")
@@ -133,7 +134,8 @@ def writeAnimationfile(animname, images, additionalinformation):
     sectionnames = {}
     for f in images:
         sectionnames[f["name"]] = True
-    del sectionnames[firstsection]
+    if firstsection in sectionnames:
+        del sectionnames[firstsection]
 
     f = open(animname,'w')
     write_section(firstsection)
