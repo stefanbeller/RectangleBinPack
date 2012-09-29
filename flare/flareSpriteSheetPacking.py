@@ -110,7 +110,7 @@ def writeImageFile(imgname, images):
         assert (r["x"]+ r["width"] <=w)
         assert (r["y"]+ r["height"] <=h)
         result.paste(r["image"], (r["x"], r["y"]))
-    result.save(imgname)
+    result.save(imgname, option='optimize')
 
 def writeAnimationfile(animname, images, additionalinformation):
     w, h = 0, 0
