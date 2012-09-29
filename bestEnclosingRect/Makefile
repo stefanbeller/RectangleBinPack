@@ -10,7 +10,6 @@ LDFLAGS = -fwhole-program -pthread -lm
 
 all: $(OBJS)
 	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(OBJS) -o rectpacker
-	cp rectpacker ~/bin/rectpacker
 
 clean:
 	rm -rf $(OBJS)
