@@ -126,9 +126,13 @@ def writeAnimationfile(animname, images, additionalinformation):
             f.write("frames="+str(framelist[0]["frames"])+"\n")
             f.write("duration="+str(framelist[0]["duration"])+"\n")
             f.write("type="+str(framelist[0]["type"])+"\n")
-        for x in framelist:
-            #frame=index,direction,x,y,w,h,offsetx,offsety
-            f.write("frame="+str(x["index"])+","+str(x["direction"])+","+str(x["x"])+","+str(x["y"])+","+str(x["width"])+","+str(x["height"])+","+str(x["renderoffset"][0])+","+str(x["renderoffset"][1])+"\n")
+            for x in framelist:
+                #frame=index,direction,x,y,w,h,offsetx,offsety
+                f.write("frame="+str(x["index"])+","+str(x["direction"])+","+str(x["x"])+","+str(x["y"])+","+str(x["width"])+","+str(x["height"])+","+str(x["renderoffset"][0])+","+str(x["renderoffset"][1])+"\n")
+        else:
+            f.write("frames=1\n")
+            f.write("duration=1\n")
+            f.write("type=back_forth\n")
 
     firstsection=additionalinformation["firstsection"]
     sectionnames = {}
