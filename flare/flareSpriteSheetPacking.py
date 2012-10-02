@@ -60,6 +60,7 @@ def parseAnimationFile(fname, imgname):
 
     firstsection = True
     newsection = False
+    compressedloading = False
     for line in lines:
         if line.startswith("render_size"):
             value=line.split("=")[1]
@@ -83,16 +84,53 @@ def parseAnimationFile(fname, imgname):
         if line.startswith("type"):
             _type=line.split("=")[1].strip()
 
+        if line.startswith("frame="):
+            compressedloading = True;
+            vals = line.split("=")[1].split(",")
+            index = int(vals[0])
+            direction = int(vals[1])
+            x = int(vals[2])
+            y = int(vals[3])
+            w = x + int(vals[4])
+            h = y + int(vals[5])
+            render_offset_x = int(vals[6])
+            render_offset_y = int(vals[7])
+            imgrect = (x, y, w, h)
+            partimg = img.copy().crop(imgrect)
+            bbox = partimg.split()[partimg.getbands().index('A')].getbbox()
+            newimg = partimg.crop(bbox)
+
+            if bbox is None:
+                print imgname
+                print "skipping empty image at ",(x, y, w, h)
+                print "direction is ", direction
+            else:
+                f = {
+                    "name" : sectionname,
+                    "type" : _type,
+                    "direction" : direction,
+                    "index" : index,
+                    "duration" : duration,
+                    "frames" : frames,
+                    "renderoffset" : (render_offset_x-bbox[0], render_offset_y-bbox[1]),
+                    "image" : newimg,
+                    "width" : newimg.size[0],
+                    "height" : newimg.size[1]
+                }
+                images += [f]
+
         if line.startswith("["):
             newsection = True
-            if not firstsection:
+            if not firstsection and not compressedloading:
                 images += processNextSection()
+            compressedloading = False
             sectionname=line.strip()[1:-1]
             if firstsection:
                 additionalinformation['firstsection'] = sectionname
             firstsection=False
 
-    images += processNextSection()
+    if not compressedloading:
+        images += processNextSection()
     return images, additionalinformation
 
 
