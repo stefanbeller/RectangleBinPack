@@ -61,17 +61,15 @@ def parseAnimationFile(fname, imgname):
     firstsection = True
     newsection = False
     for line in lines:
-        if line.startswith("render_size_x"):
-            render_size_x=int(line.split("=")[1])
-
-        if line.startswith("render_size_y"):
-            render_size_y=int(line.split("=")[1])
+        if line.startswith("render_size"):
+            value=line.split("=")[1]
+            render_size_x=int(value.split(",")[0])
+            render_size_y=int(value.split(",")[1])
 
         if line.startswith("render_offset_x"):
-            render_offset_x=int(line.split("=")[1])
-
-        if line.startswith("render_offset_y"):
-            render_offset_y=int(line.split("=")[1])
+            value = line.split("=")[1]
+            render_offset_x=int(value.split(",")[0])
+            render_offset_y=int(value.split(",")[1])
 
         if line.startswith("position"):
             position=int(line.split("=")[1])
