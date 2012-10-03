@@ -48,25 +48,23 @@ void calculateBoundaries(vector<RectSize> rects) {
 		minEnclosingArea += it->height*it->width;
 	}
 	maxEnclosingArea = rects.size() * maxSmallRectHeight * maxSmallRectWidth;
-	best_rects_size = maxEnclosingArea;
+	best_rects_size = 2 * maxEnclosingArea;
 }
 
 /// Round up to next higher power of 2 (return x if it's already a power
 /// of 2).
-inline int
-pow2roundup (int x)
+unsigned pow2roundup(unsigned x)
 {
-    if (x < 0)
-        return 0;
-    --x;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    return x+1;
+	if (x == 0)
+		return 0;
+	--x;
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x |= x >> 16;
+	return x+1;
 }
-
 
 struct WorkerJob {
 	vector<RectSize> *passed_rects;
@@ -178,10 +176,12 @@ void checkAreaSizePowersOf2(vector<RectSize> &passed_rects) {
 	delete workDispatcher;
 	maxEnclosingHeight = enclosingRectHeight(best_rects);
 	maxEnclosingWidth = enclosingRectWidth(best_rects);
+	assert(maxEnclosingHeight > 0);
+	assert(maxEnclosingWidth > 0);
 }
 
 void binarySearch(vector<RectSize> &rects) {
-	unsigned long upper = min((unsigned long )(maxEnclosingWidth * maxEnclosingHeight),(unsigned long)maxEnclosingArea);
+	unsigned long upper = min((unsigned long)(maxEnclosingWidth * maxEnclosingHeight),(unsigned long)maxEnclosingArea);
 	unsigned long lower = minEnclosingArea;
 
 	while (upper - lower > 1) {
