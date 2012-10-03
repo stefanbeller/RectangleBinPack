@@ -9,6 +9,8 @@ import time
 import tempfile
 import subprocess
 
+import numpy as np
+
 try:
     os.nice(20)
 except:
@@ -133,6 +135,17 @@ def parseAnimationFile(fname, imgname):
         images += processNextSection()
     return images, additionalinformation
 
+def getpathfromsplit(spl):
+    out_str = ''
+    for num in xrange(len(spl)-1):
+        out_str += spl[num]+"/"
+    out_str+=spl[-1]
+    return out_str
+
+def ensure_dir(f):
+    d = os.path.dirname(f)
+    if not os.path.exists(d):
+        os.makedirs(d)
 
 def writeImageFile(imgname, images):
     w, h = 0, 0
@@ -147,6 +160,22 @@ def writeImageFile(imgname, images):
         assert (r["y"]+ r["height"] <=h)
         result.paste(r["image"], (r["x"], r["y"]))
     result.save(imgname, option='optimize')
+
+    splitup = imgname.split("/")
+    splitup.insert(-1, "noalpha")
+    path=getpathfromsplit(splitup)
+    ensure_dir(path)
+
+    orig_color=(0,0,0,0)
+    replacement_color=(255,0,255,255)
+    arr = np.array(np.asarray(result))
+    mask=np.logical_and.reduce([(arr[:,:,i]==orig_color[i]) for i in range(4)])
+    for i in range(4):
+        arr[mask,i]=replacement_color[i]
+    img = Image.fromarray(arr,mode='RGBA')
+    img = img.convert("RGB")
+    img.save(path, option='optimize')
+
 
 def writeAnimationfile(animname, images, additionalinformation):
     w, h = 0, 0
