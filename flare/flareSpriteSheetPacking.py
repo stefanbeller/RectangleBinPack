@@ -73,7 +73,7 @@ def parseAnimationFile(fname, imgname):
             render_size_x=int(value.split(",")[0])
             render_size_y=int(value.split(",")[1])
 
-        if line.startswith("render_offset_x"):
+        if line.startswith("render_offset"):
             value = line.split("=")[1]
             render_offset_x=int(value.split(",")[0])
             render_offset_y=int(value.split(",")[1])
