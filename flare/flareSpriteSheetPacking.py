@@ -64,6 +64,10 @@ def parseAnimationFile(fname, imgname):
     newsection = False
     compressedloading = False
     for line in lines:
+        if line.startswith("image="):
+            imgname=line.split("=")[1] # keep this information to write out again!
+            additionalinformation["imagename"]=imgname
+
         if line.startswith("render_size"):
             value=line.split("=")[1]
             render_size_x=int(value.split(",")[0])
@@ -207,6 +211,11 @@ def writeAnimationfile(animname, images, additionalinformation):
         del sectionnames[firstsection]
 
     f = open(animname,'w')
+
+    f.write("")
+    f.write("image="+additionalinformation["imagename"])
+    f.write("")
+
     write_section(firstsection)
     for section in sectionnames:
         write_section(section)
