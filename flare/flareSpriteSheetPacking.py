@@ -8,6 +8,7 @@ import sys
 import time
 import tempfile
 import subprocess
+import sha
 
 import numpy as np
 
@@ -212,9 +213,10 @@ def writeAnimationfile(animname, images, additionalinformation):
 
     f = open(animname,'w')
 
-    f.write("")
-    f.write("image="+additionalinformation["imagename"])
-    f.write("")
+    if "imagename" in additionalinformation:
+        f.write("\n")
+        f.write("image="+additionalinformation["imagename"])
+        #f.write("\n")
 
     write_section(firstsection)
     for section in sectionnames:
@@ -222,12 +224,13 @@ def writeAnimationfile(animname, images, additionalinformation):
     f.close()
 
 def extractRects(images):
-    """returns an array of dicts having ony width, height and index.
+    """returns an array of dicts having only width, height and index.
     The index describes the position in the passed array"""
     ret=[]
     for xindex, x in enumerate(images):
-        r={"width":x["width"], "height":x["height"], "index":xindex}
-        ret +=[r]
+        if not "isequalto" in x:
+            r={"width":x["width"], "height":x["height"], "index":xindex, "gid":x["gid"]}
+            ret +=[r]
     return ret
 
 def matchRects(newrects, images):
@@ -237,6 +240,11 @@ def matchRects(newrects, images):
         images[index]["y"] = r["y"]
         #assert(images[index]["width"] == r["width"])
         #assert(images[index]["height"] == r["height"])
+    for im in images:
+        if "isequalto" in im:
+            im["x"] = images[im["isequalto"]]["x"]
+            im["y"] = images[im["isequalto"]]["y"]
+
     return images
 
 def findBestEnclosingRectangle(rects):
@@ -256,4 +264,37 @@ def findBestEnclosingRectangle(rects):
         rect["x"]=int(pos.split()[0])
         rect["y"]=int(pos.split()[1])
     return rects
+
+def removeDuplicates(images):
+    # assign global unique ids to each image:
+    gid=0
+    for im in images:
+        im["gid"]=gid
+        im["imagehash"]=sha.sha(im["image"].tostring()).hexdigest()
+        gid+=1
+
+    for im1 in images:
+        for im2 in images:
+            if im1["imagehash"] == im2["imagehash"]:
+                smallergid = min(im1["gid"],im2["gid"])
+                if "isequalto" in im1:
+                    im1["isequalto"]=min(smallergid, im1["isequalto"])
+                else:
+                    im1["isequalto"]=smallergid
+
+                if "isequalto" in im2:
+                    im2["isequalto"]=min(smallergid, im2["isequalto"])
+                else:
+                    im2["isequalto"]=smallergid
+
+
+    for im in images:
+        if "isequalto" in im:
+            if im["isequalto"] == im["gid"]:
+                del im["isequalto"]
+
+    return images
+
+
+
 
