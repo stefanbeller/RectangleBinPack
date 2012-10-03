@@ -167,8 +167,8 @@ void checkAreaSizePowersOf2(vector<RectSize> &passed_rects) {
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
 
-	for (unsigned int w = pow2roundup(maxSmallRectWidth); w <= maxEnclosingArea/maxSmallRectHeight; w*=2) {
-		for (unsigned int h = pow2roundup(maxSmallRectHeight); h <= maxEnclosingArea/maxSmallRectWidth; h*=2) {
+	for (unsigned int w = pow2roundup(maxSmallRectWidth); w <= 2 * maxEnclosingArea/maxSmallRectHeight; w*=2) {
+		for (unsigned int h = pow2roundup(maxSmallRectHeight); h <= 2 * maxEnclosingArea/maxSmallRectWidth; h*=2) {
 			if ( w * h < minEnclosingArea) continue;
 			WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds);
 			workDispatcher->addTask(t);
