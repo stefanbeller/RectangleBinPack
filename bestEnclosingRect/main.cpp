@@ -220,10 +220,13 @@ void binarySearch(vector<RectSize> &rects) {
 
 	while (upper - lower > 1) {
 		unsigned long middle = (upper + lower) / 2;
-		if (checkAreaSizeFast(rects, middle, maxTriesBinarySearch))
+		if (checkAreaSizeFast(rects, middle, maxTriesBinarySearch)) {
 			upper = best_rects_size;
-		else
+			lower = std::min(lower, upper);
+		}
+		else {
 			lower = middle;
+		}
 	}
 }
 
