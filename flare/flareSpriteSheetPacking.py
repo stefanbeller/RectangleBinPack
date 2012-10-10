@@ -49,7 +49,8 @@ def parseAnimationFile(fname, imgname):
                         "renderoffset" : (render_offset_x-bbox[0], render_offset_y-bbox[1]),
                         "image" : newimg,
                         "width" : newimg.size[0],
-                        "height" : newimg.size[1]
+                        "height" : newimg.size[1],
+                        "active_frame" : active_frame
                     }
                     images += [f]
         return images
@@ -64,6 +65,7 @@ def parseAnimationFile(fname, imgname):
     firstsection = True
     newsection = False
     compressedloading = False
+    active_frame = None
     for line in lines:
         if line.startswith("image="):
             imgname=line.split("=")[1] # keep this information to write out again!
@@ -90,6 +92,9 @@ def parseAnimationFile(fname, imgname):
 
         if line.startswith("type"):
             _type=line.split("=")[1].strip()
+
+        if line.startswith("active_frame"):
+            active_frame=line.split("=")[1].strip()
 
         if line.startswith("frame="):
             compressedloading = True;
@@ -122,7 +127,8 @@ def parseAnimationFile(fname, imgname):
                     "renderoffset" : (render_offset_x-bbox[0], render_offset_y-bbox[1]),
                     "image" : newimg,
                     "width" : newimg.size[0],
-                    "height" : newimg.size[1]
+                    "height" : newimg.size[1],
+                    "active_frame" : active_frame
                 }
                 images += [f]
 
@@ -196,6 +202,8 @@ def writeAnimationfile(animname, images, additionalinformation):
             f.write("frames="+str(framelist[0]["frames"])+"\n")
             f.write("duration="+str(framelist[0]["duration"])+"\n")
             f.write("type="+str(framelist[0]["type"])+"\n")
+            if framelist[0]["active_frame"]:
+                f.write("active_frame="+str(framelist[0]["active_frame"])+"\n")
             for x in framelist:
                 #frame=index,direction,x,y,w,h,offsetx,offsety
                 f.write("frame="+str(x["index"])+","+str(x["direction"])+","+str(x["x"])+","+str(x["y"])+","+str(x["width"])+","+str(x["height"])+","+str(x["renderoffset"][0])+","+str(x["renderoffset"][1])+"\n")
