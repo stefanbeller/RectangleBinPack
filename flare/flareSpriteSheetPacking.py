@@ -126,8 +126,6 @@ def parseAnimationFile(fname, imgname):
                     "frames" : frames,
                     "renderoffset" : (render_offset_x-bbox[0], render_offset_y-bbox[1]),
                     "image" : newimg,
-                    "width" : newimg.size[0],
-                    "height" : newimg.size[1],
                     "active_frame" : active_frame
                 }
                 images += [f]
@@ -161,14 +159,14 @@ def ensure_dir(f):
 def writeImageFile(imgname, images):
     w, h = 0, 0
     for n in images:
-        w = max(n["x"]+n["width"], w)
-        h = max(n["y"]+n["height"], h)
+        w = max(n["x"]+n["image"].size[0], w)
+        h = max(n["y"]+n["image"].size[1], h)
 
     # write actual image:
     result = Image.new('RGBA', (w,h), (0, 0, 0, 0))
     for r in images:
-        assert (r["x"]+ r["width"] <=w)
-        assert (r["y"]+ r["height"] <=h)
+        assert (r["x"]+ r["image"].size[0] <=w)
+        assert (r["y"]+ r["image"].size[1] <=h)
         result.paste(r["image"], (r["x"], r["y"]))
     result.save(imgname, option='optimize')
 
@@ -191,8 +189,8 @@ def writeImageFile(imgname, images):
 def writeAnimationfile(animname, images, additionalinformation):
     w, h = 0, 0
     for n in images:
-        w = max(n["x"]+n["width"], w)
-        h = max(n["y"]+n["height"], h)
+        w = max(n["x"]+n["image"].size[0], w)
+        h = max(n["y"]+n["image"].size[1], h)
 
     def write_section(name):
         framelist = filter(lambda s: s["name"] == name, images)
@@ -206,7 +204,7 @@ def writeAnimationfile(animname, images, additionalinformation):
                 f.write("active_frame="+str(framelist[0]["active_frame"])+"\n")
             for x in framelist:
                 #frame=index,direction,x,y,w,h,offsetx,offsety
-                f.write("frame="+str(x["index"])+","+str(x["direction"])+","+str(x["x"])+","+str(x["y"])+","+str(x["width"])+","+str(x["height"])+","+str(x["renderoffset"][0])+","+str(x["renderoffset"][1])+"\n")
+                f.write("frame="+str(x["index"])+","+str(x["direction"])+","+str(x["x"])+","+str(x["y"])+","+str(x["image"].size[0])+","+str(x["image"].size[1])+","+str(x["renderoffset"][0])+","+str(x["renderoffset"][1])+"\n")
         else:
             f.write("frames=1\n")
             f.write("duration=1\n")
@@ -237,7 +235,7 @@ def extractRects(images):
     ret=[]
     for xindex, x in enumerate(images):
         if not "isequalto" in x:
-            r={"width":x["width"], "height":x["height"], "index":xindex, "gid":x["gid"]}
+            r={"width":x["image"].size[0], "height":x["image"].size[1], "index":xindex, "gid":x["gid"]}
             ret +=[r]
     return ret
 
