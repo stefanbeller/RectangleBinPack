@@ -28,6 +28,7 @@ if __name__ == "__main__":
             for index, img in enumerate(imgs):
                 newsize = (img["image"].size[0]/2, img["image"].size[1]/2)
                 imgs[index]["image"] = img["image"].resize(newsize, Image.BICUBIC)
+                imgs[index]["renderoffset"] = (imgs[index]["renderoffset"][0]/2, imgs[index]["renderoffset"][1]/2)
 
         rects = flareSpriteSheetPacking.extractRects(imgs)
         newrects = flareSpriteSheetPacking.findBestEnclosingRectangle(rects)
