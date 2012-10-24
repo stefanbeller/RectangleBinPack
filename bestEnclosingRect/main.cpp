@@ -1,7 +1,7 @@
 /** @file main.cpp
 	@author Stefan Beller
 
-	GPLv3 or later.
+	public domain.
 */
 #include "MaxRectsBinPack.h"
 #include "Rect.h"

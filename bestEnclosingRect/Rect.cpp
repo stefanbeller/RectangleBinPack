@@ -1,7 +1,7 @@
 /** @file Rect.cpp
 	@author Jukka Jylänki, Stefan Beller
 
-	GPLv3 or later.
+	public domain.
 */
 #include <utility>
 

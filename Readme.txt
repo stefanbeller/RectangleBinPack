@@ -9,7 +9,7 @@ http://clb.demon.fi/projects/even-more-rectangle-bin-packing
 The original code is found at https://github.com/juj/RectangleBinPack/
 It is provided by Jukka Jylänki as public domain.
 
-The modified code here is licensed as GPLv3 or later.
+The modified code here is still licensed as public domain.
 
 The c++ project in the bestEnclosingRect subdirectory is a general
 approach to find the smallest enclosing rectangle around a

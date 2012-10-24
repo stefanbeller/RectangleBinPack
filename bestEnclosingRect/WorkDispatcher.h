@@ -1,4 +1,8 @@
+/** @file WorkDispatcher.h
+	@author Stefan Beller
 
+	public domain.
+*/
 #pragma once
 #ifndef __WORKDISPATCHER__
 #define __WORKDISPATCHER__

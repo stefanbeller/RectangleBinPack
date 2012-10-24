@@ -1,3 +1,8 @@
+/** @file WorkDispatcher.cpp
+	@author Stefan Beller
+
+	public domain.
+*/
 #include "WorkDispatcher.h"
 #include <assert.h>
 

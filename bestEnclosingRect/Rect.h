@@ -1,7 +1,7 @@
 /** @file Rect.h
 	@author Jukka Jylänki, Stefan Beller
 
-	GPLV3 or later
+	public domain.
 */
 #pragma once
 #ifndef __RECT__
