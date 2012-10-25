@@ -1,6 +1,5 @@
 # Makefile
-# Stefan Beller
-# GPLv3 or later.
+# copyright 2012, Stefan Beller
 
 OBJS = GuillotineBinPack.o  main.o  MaxRectsBinPack.o  Rect.o  WorkDispatcher.o
 CXX = g++
