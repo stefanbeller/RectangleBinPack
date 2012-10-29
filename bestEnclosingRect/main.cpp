@@ -239,11 +239,13 @@ int main(int argc, char **argv)
 {
 	if (argc < 3 || argc % 2 != 1)
 	{
-		printf("Usage: MaxRectsBinPackTest w_0 h_0 w_1 h_1 w_2 h_2 ... w_n h_n\n");
-		printf("       w_i is the width of the i'th rectangle to pack, and h_i the height.\n");
-		printf("Example: MaxRectsBinPackTest 256 256 30 20 50 20 10 80 90 20\n\n");
-		printf("On error 1 will be returned. On success the return value is 0 and the x/y coordinates \n");
-		printf("of each input rect will be printed to screen. The order of the output is the same as in the input.\n");
+		fprintf(stderr, "Usage: \n\trectpacker w_0 h_0 w_1 h_1 w_2 h_2 ... w_n h_n\n\n");
+		fprintf(stderr, "w_i is the width of the i'th rectangle to pack, and h_i the height.\n");
+		fprintf(stderr, "Example: MaxRectsBinPackTest 256 256 30 20 50 20 10 80 90 20\n\n");
+		fprintf(stderr, "On error a value unequal zero will be returned.\n");
+		fprintf(stderr, "On success the return value is 0 and the x/y coordinates \n");
+		fprintf(stderr, "of each input rect will be printed to screen.\n");
+		fprintf(stderr, "The order of the output is the same as in the input.\n");
 		return 1;
 	}
 
@@ -258,6 +260,11 @@ int main(int argc, char **argv)
 		RectSize r;
 		r.width = atoi(argv[i]);
 		r.height = atoi(argv[i+1]);
+		if (r.width <= 0 || r.height <= 0) {
+			fprintf(stderr, "input parameters: width and height must be greater than zero.\n");
+			return 2;
+		}
+
 		r.id = (i-1)/2;
 		rects.push_back(r);
 	}
