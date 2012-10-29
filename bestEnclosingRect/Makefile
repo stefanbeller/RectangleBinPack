@@ -1,7 +1,7 @@
 # Makefile
 # copyright 2012, Stefan Beller
 
-OBJS = GuillotineBinPack.o  main.o  MaxRectsBinPack.o  Rect.o  WorkDispatcher.o
+OBJS = GuillotineBinPack.o  main.o  MaxRectsBinPack.o  Rect.o  WorkDispatcher.o NumberOfCores.o
 CXX = g++
 CPPFLAGS = -O3 -g -flto -Wall
 

@@ -7,6 +7,7 @@
 #include "Rect.h"
 
 #include "WorkDispatcher.h"
+#include "NumberOfCores.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,7 @@ unsigned int maxSmallRectHeight;
 unsigned long minEnclosingArea;
 unsigned long maxEnclosingArea;
 
-const int MAXTHREADS = 9;
+const int MAXTHREADS = getNumCores();
 const int maxTriesBinarySearch = 2048;
 
 
