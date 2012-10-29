@@ -53,13 +53,21 @@ struct WorkerJob {
 	unsigned int h;
 	sem_t *postOnFound;
 	bool updateConstraintsRect;
-	WorkerJob(vector<RectSize> *passed_rects_, unsigned int w_, unsigned int h_, sem_t *postOnFound_, bool updateConstraintsRect_) {
-		passed_rects = passed_rects_;
-		w = w_;
-		h = h_;
-		postOnFound = postOnFound_;
-		updateConstraintsRect = updateConstraintsRect_;
-	}
+	MaxRectsBinPack::FreeRectChoiceHeuristic heuristic;
+	WorkerJob(
+		vector<RectSize> *passed_rects_,
+		unsigned int w_,
+		unsigned int h_,
+		sem_t *postOnFound_,
+		bool updateConstraintsRect_,
+		MaxRectsBinPack::FreeRectChoiceHeuristic _heuristic = MaxRectsBinPack::RectBestShortSideFit)
+			: passed_rects(passed_rects_)
+			, w(w_)
+			, h(h_)
+			, postOnFound(postOnFound_)
+			, updateConstraintsRect(updateConstraintsRect_)
+			, heuristic(_heuristic)
+	{}
 };
 
 
@@ -145,8 +153,12 @@ bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area)
 		for (unsigned int w = maxSmallRectWidth, end = maxEnclosingWidth; w < end; w++) {
 			unsigned int h = min(static_cast<unsigned int>(area/w), maxEnclosingHeight);
 			assert (w <= maxEnclosingWidth || h <= maxEnclosingHeight);
-			WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds, false);
-			workDispatcher->addTask(t);
+
+			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestShortSideFit));
+			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestLongSideFit));
+			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestAreaFit));
+			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBottomLeftRule));
+			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectContactPointRule));
 		}
 	}
 
