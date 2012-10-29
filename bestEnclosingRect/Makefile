@@ -14,7 +14,6 @@ clean:
 	rm -rf $(OBJS)
 
 test: all
-	./rectpacker 0 0
 	./rectpacker 1 1
 	./rectpacker 1 1 2 2
 	./rectpacker 1 1 1 1 1 1 1 1
