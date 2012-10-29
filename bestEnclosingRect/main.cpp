@@ -24,10 +24,10 @@ using namespace std;
 
 bool compareRectIds (Rect i, Rect j) { return (i.id < j.id); }
 
-unsigned int maxSmallRectWidth = 0;
-unsigned int maxSmallRectHeight = 0;
-unsigned long minEnclosingArea = 0;
-unsigned long maxEnclosingArea = 0;
+unsigned int maxSmallRectWidth;
+unsigned int maxSmallRectHeight;
+unsigned long minEnclosingArea;
+unsigned long maxEnclosingArea;
 
 const int MAXTHREADS = 9;
 const int maxTriesBinarySearch = 2048;
@@ -63,10 +63,9 @@ struct WorkerJob {
 
 
 void calculateBoundaries(vector<RectSize> rects) {
-	maxSmallRectWidth = 0;
-	maxSmallRectHeight = 0;
+	maxSmallRectWidth = 1;
+	maxSmallRectHeight = 1;
 	minEnclosingArea = 0;
-	maxEnclosingArea = 0;
 	for (vector<RectSize>::iterator it = rects.begin(), end = rects.end(); it != end; ++it) {
 		maxSmallRectHeight = std::max(maxSmallRectHeight, (unsigned int)it->height);
 		maxSmallRectWidth = std::max(maxSmallRectWidth, (unsigned int)it->width);
