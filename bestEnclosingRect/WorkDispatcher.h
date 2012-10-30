@@ -16,9 +16,9 @@ private:
 	const unsigned MAX_THREADS; // how many threads to spawn.
 
 	// always aquire the semaphores with lowest priority first.
-	sem_t mutex;        // prio 3
+	sem_t mutex;        // prio 3 (highest)
 	sem_t workingcount; // prio 2
-	sem_t freecount;    // prio 1
+	sem_t freecount;    // prio 1 (lowest)
 
 	std::queue<void*> jobs; // queue holding the arguments to be solved.
 	pthread_t *threads; // threads

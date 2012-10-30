@@ -32,9 +32,9 @@ void *WorkDispatcher::getTask() {
 	void *ret;
 	sem_wait(&workingcount);
 	sem_wait(&mutex);
-	sem_post(&freecount);
 	ret = jobs.front();
 	jobs.pop();
+	sem_post(&freecount);
 	sem_post(&mutex);
 	return ret;
 }
