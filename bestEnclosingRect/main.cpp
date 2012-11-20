@@ -7,7 +7,6 @@
 #include "Rect.h"
 
 #include "WorkDispatcher.h"
-#include "NumberOfCores.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,9 +29,7 @@ unsigned int maxSmallRectHeight;
 unsigned long minEnclosingArea;
 unsigned long maxEnclosingArea;
 
-const int MAXTHREADS = getNumCores();
 const int maxTriesBinarySearch = 2048;
-
 
 // holds rectangles of equal size; each rectangle has width/height as a power of 2.
 // may only be changed if the mutex is hold.
@@ -141,7 +138,7 @@ void checkArea(void *args)
 
 bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area) {
 	// returns true if a fit was found
-	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea), MAXTHREADS);
+	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea));
 
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
@@ -170,7 +167,7 @@ bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area)
 bool checkAreaSizeFast(vector<RectSize> &passed_rects, unsigned long area, int maxTries = 0) {
 	// returns true if a fit was found
 	bool foundFit = false;
-	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea), MAXTHREADS);
+	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea));
 
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
@@ -208,7 +205,7 @@ bool checkAreaSizeFast(vector<RectSize> &passed_rects, unsigned long area, int m
 }
 
 void checkAreaSizePowersOf2(vector<RectSize> &passed_rects) {
-	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea), MAXTHREADS);
+	WorkDispatcher *workDispatcher = new WorkDispatcher(reinterpret_cast<void (*)(void*)>(&checkArea));
 
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);

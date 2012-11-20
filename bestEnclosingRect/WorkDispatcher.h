@@ -35,6 +35,8 @@ public:
 	 * Creates a WorkDispatcher, which uses up to \a maxthreads threads.
 	 * Within the threads the function \a fct is called with the pointer as
 	 * given in addTask.
+	 * \a maxthreads is an optional parameter. if it is not given, the number
+	 * of cores available will be used.
 	 */
 	WorkDispatcher(void fct(void*), unsigned maxthreads = 0);
 

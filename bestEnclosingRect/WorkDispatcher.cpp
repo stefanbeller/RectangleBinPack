@@ -3,7 +3,9 @@
 
 	public domain.
 */
+
 #include "WorkDispatcher.h"
+#include "NumberOfCores.h"
 #include <assert.h>
 
 void* WorkDispatcher::dispatcher(void *args) {
@@ -15,7 +17,7 @@ void* WorkDispatcher::dispatcher(void *args) {
 }
 
 WorkDispatcher::WorkDispatcher(void workertask(void*), const unsigned numThreads)
- : MAX_THREADS(numThreads)
+ : MAX_THREADS(numThreads == 0 ? getNumCores() : numThreads)
  , externcall(workertask)
 {
 	sem_init(&mutex, 0, 1);
