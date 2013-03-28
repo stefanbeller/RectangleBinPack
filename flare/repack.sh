@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for mod in fantasycore alpha_demo minicore
+for mod in fantasycore alpha_demo
 do
     if [ -e "../../flare-game/mods/${mod}/animations" ] ; then
         for animfile in $(find ../../flare-game/mods/${mod}/animations |grep "\.txt$")
@@ -15,9 +15,3 @@ do
         echo "$mod has no animations folder"
     fi
 done
-
-# for flare game:
-# the goblins are handled 2 in one, take care!
-#git checkout mods/fantasycore/animations/enemies/goblin*
-#git checkout mods/fantasycore/images/enemies/goblin*
-#rm mods/fantasycore/images/enemies/noalpha/goblin*
