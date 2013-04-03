@@ -26,6 +26,12 @@ if __name__ == "__main__":
 
         if args.resize:
             for index, img in enumerate(imgs):
+                imag = img["image"].load()
+                for y in xrange(img["image"].size[1]):
+                    for x in xrange(img["image"].size[0]):
+                        if imag[x, y] == (255, 0, 255, 0):
+                            imag[x, y] = (0, 0, 0, 0)
+
                 newsize = (img["image"].size[0]/2, img["image"].size[1]/2)
                 imgs[index]["image"] = img["image"].resize(newsize, Image.BICUBIC)
                 imgs[index]["renderoffset"] = (imgs[index]["renderoffset"][0]/2, imgs[index]["renderoffset"][1]/2)
