@@ -3,9 +3,9 @@
 
 OBJS = GuillotineBinPack.o  main.o  MaxRectsBinPack.o  Rect.o  WorkDispatcher.o NumberOfCores.o
 CXX = g++
-CPPFLAGS = -O3 -g -flto -Wall
+CPPFLAGS = -march=native -mtune=native -Ofast -g -flto -Wall
 
-LDFLAGS = -fwhole-program -pthread -lm
+LDFLAGS = -march=native -mtune=native -Ofast -g -fwhole-program -pthread -lm
 
 all: $(OBJS)
 	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(OBJS) -o rectpacker
