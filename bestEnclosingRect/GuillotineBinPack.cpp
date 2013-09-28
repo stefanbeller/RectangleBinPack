@@ -15,6 +15,7 @@
 
 #include "GuillotineBinPack.h"
 
+namespace rbp {
 using namespace std;
 
 GuillotineBinPack::GuillotineBinPack()
@@ -633,4 +634,5 @@ void GuillotineBinPack::MergeFreeList()
 	for(size_t i = 0; i < freeRectangles.size(); ++i)
 		assert(test.Add(freeRectangles[i]) == true);
 #endif
+}
 }

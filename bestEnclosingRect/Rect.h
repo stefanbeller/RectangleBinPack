@@ -19,6 +19,8 @@
 
 using namespace std;
 
+namespace rbp {
+
 struct RectSize
 {
 	int width;
@@ -61,5 +63,7 @@ public:
 	bool Disjoint(const Rect &r) const;
 	static bool Disjoint(const Rect &a, const Rect &b);
 };
+
+}
 
 #endif

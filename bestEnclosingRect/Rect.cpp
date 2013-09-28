@@ -7,6 +7,8 @@
 
 #include "Rect.h"
 
+namespace rbp {
+
 bool IsContainedIn(const Rect &a, const Rect &b)
 {
 	return a.x >= b.x && a.y >= b.y
@@ -75,4 +77,6 @@ bool DisjointRectCollection::Disjoint(const Rect &r) const
 		if (!Disjoint(rects[i], r))
 			return false;
 	return true;
+}
+
 }

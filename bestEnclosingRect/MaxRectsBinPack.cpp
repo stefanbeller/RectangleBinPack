@@ -15,6 +15,8 @@
 
 #include "MaxRectsBinPack.h"
 
+namespace rbp {
+
 using namespace std;
 
 MaxRectsBinPack::MaxRectsBinPack()
@@ -525,4 +527,5 @@ unsigned MaxRectsBinPack::usedRectHeight() {
 }
 unsigned long MaxRectsBinPack::usedRectArea() {
 	return enclosingRectArea(usedRectangles);
+}
 }

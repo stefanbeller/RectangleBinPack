@@ -21,6 +21,7 @@
 #include <pthread.h>
 
 using namespace std;
+using namespace rbp;
 
 bool compareRectIds (Rect i, Rect j) { return (i.id < j.id); }
 
