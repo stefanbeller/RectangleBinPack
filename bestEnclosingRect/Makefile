@@ -1,11 +1,11 @@
 # Makefile
 # copyright 2012, Stefan Beller
+# This file is also public domain
 
 OBJS = GuillotineBinPack.o  main.o  MaxRectsBinPack.o  Rect.o  WorkDispatcher.o NumberOfCores.o
 CXX = g++
-CPPFLAGS = -march=native -mtune=native -Ofast -g -flto -Wall -Wextra 
-
-LDFLAGS = -march=native -mtune=native -Ofast -g -flto -fwhole-program -pthread -lm
+CPPFLAGS = -march=native -mtune=native -Ofast -g -flto -Wall -Wextra
+LDFLAGS = -march=native -mtune=native -Ofast -g -flto -fwhole-program -pthread
 
 all: $(OBJS)
 	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(OBJS) -o rectpacker
