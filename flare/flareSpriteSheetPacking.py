@@ -271,27 +271,27 @@ def findBestEnclosingRectangle(rects):
         rect["y"]=int(pos.split()[1])
     return rects
 
-def removeDuplicates(images):
+def markDuplicates(images):
     # assign global unique ids to each image:
     gid=0
     for im in images:
-        im["gid"]=gid
-        im["imagehash"]=sha.sha(im["image"].tostring()).hexdigest()
-        gid+=1
+        im["gid"] = gid
+        im["imagehash"] = sha.sha(im["image"].tostring()).hexdigest()
+        gid += 1
 
     for im1 in images:
         for im2 in images:
             if im1["imagehash"] == im2["imagehash"]:
-                smallergid = min(im1["gid"],im2["gid"])
+                smallergid = min(im1["gid"], im2["gid"])
                 if "isequalto" in im1:
-                    im1["isequalto"]=min(smallergid, im1["isequalto"])
+                    im1["isequalto"] = min(smallergid, im1["isequalto"])
                 else:
-                    im1["isequalto"]=smallergid
+                    im1["isequalto"] = smallergid
 
                 if "isequalto" in im2:
-                    im2["isequalto"]=min(smallergid, im2["isequalto"])
+                    im2["isequalto"] = min(smallergid, im2["isequalto"])
                 else:
-                    im2["isequalto"]=smallergid
+                    im2["isequalto"] = smallergid
 
 
     for im in images:

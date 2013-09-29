@@ -148,7 +148,7 @@ bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area)
 		unsigned int maxEnclosingWidth = r.width;
 		unsigned int maxEnclosingHeight = r.height;
 		for (unsigned int w = maxSmallRectWidth, end = maxEnclosingWidth; w < end; w++) {
-			unsigned int h = min(static_cast<unsigned int>(area/w), maxEnclosingHeight);
+			unsigned int h = min(static_cast<unsigned int>(area / w), maxEnclosingHeight);
 			assert (w <= maxEnclosingWidth || h <= maxEnclosingHeight);
 
 			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestShortSideFit));
@@ -211,9 +211,9 @@ void checkAreaSizePowersOf2(vector<RectSize> &passed_rects) {
 	sem_init(&fitFounds, 0, 0);
 	constraint_rects_size = 4 * maxEnclosingArea;
 
-	for (unsigned int w = pow2roundup(maxSmallRectWidth); w <= 2 * maxEnclosingArea/maxSmallRectHeight; w*=2) {
-		for (unsigned int h = pow2roundup(maxSmallRectHeight); h <= 2 * maxEnclosingArea/maxSmallRectWidth; h*=2) {
-			if ( w * h < minEnclosingArea) continue;
+	for (unsigned int w = pow2roundup(maxSmallRectWidth); w <= 2 * maxEnclosingArea / maxSmallRectHeight; w*=2) {
+		for (unsigned int h = pow2roundup(maxSmallRectHeight); h <= 2 * maxEnclosingArea / maxSmallRectWidth; h*=2) {
+			if (w * h < minEnclosingArea) continue;
 			WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds, true);
 			workDispatcher->addTask(t);
 		}
@@ -268,13 +268,13 @@ int main(int argc, char **argv)
 		// Read next rectangle to pack.
 		RectSize r;
 		r.width = atoi(argv[i]);
-		r.height = atoi(argv[i+1]);
+		r.height = atoi(argv[i + 1]);
 		if (r.width <= 0 || r.height <= 0) {
 			fprintf(stderr, "input parameters: width and height must be greater than zero.\n");
 			return 2;
 		}
 
-		r.id = (i-1)/2;
+		r.id = (i - 1) / 2;
 		rects.push_back(r);
 	}
 

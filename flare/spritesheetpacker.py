@@ -5,24 +5,26 @@ import argparse
 import flareSpriteSheetPacking
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Shrink animations definition files and images.')
-    parser.add_argument('--images', metavar='path', type=type(""), nargs='+',
-               help='pathes to the image files.', dest='images')
+    parser = argparse.ArgumentParser(description='Shrink animations definition file and image.')
 
-    parser.add_argument('--definitions', metavar='path', type=type(""), nargs='+',
-               help='path to a definition file.', dest='definitions')
-    parser.add_argument('--resize', action='store_true', default=False)
-    args=parser.parse_args()
-    if args.images is None or args.definitions is None:
+    parser.add_argument('--image', metavar='path', type=type(""), nargs=1,
+               help='path to the image files.', dest='image')
+
+    parser.add_argument('--definition', metavar='path', type=type(""), nargs=1,
+               help='path to a definition file.', dest='definition')
+
+    parser.add_argument('--resize', action='store_true', default = False)
+
+    args = parser.parse_args()
+    if args.image is None or args.definition is None:
         print "At least one definition and one image must be supplied."
         exit(1)
-
-    if len(args.definitions) == 1 and len(args.images) == 1:
-        animname = args.definitions[0]
-        imgname = args.images[0]
+    else:
+        animname = args.definition[0]
+        imgname = args.image[0]
         imgrects, additionalinformation = flareSpriteSheetPacking.parseAnimationFile(animname, imgname)
 
-        imgs = flareSpriteSheetPacking.removeDuplicates(imgrects)
+        imgs = flareSpriteSheetPacking.markDuplicates(imgrects)
 
         if args.resize:
             for index, img in enumerate(imgs):
