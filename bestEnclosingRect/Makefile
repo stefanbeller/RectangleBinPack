@@ -6,12 +6,13 @@ OBJS = GuillotineBinPack.o  main.o  MaxRectsBinPack.o  Rect.o  WorkDispatcher.o 
 CXX = g++
 CPPFLAGS = -march=native -mtune=native -Ofast -g -flto -Wall -Wextra
 LDFLAGS = -march=native -mtune=native -Ofast -g -flto -fwhole-program -pthread
+TARGET = rectpacker
 
 all: $(OBJS)
-	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(OBJS) -o rectpacker
+	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(OBJS) -o $(TARGET)
 
 clean:
-	rm -rf $(OBJS)
+	rm -f $(OBJS) $(TARGET)
 
 test: all
 	./rectpacker 1 1
