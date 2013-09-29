@@ -104,8 +104,7 @@ void checkArea(void *args)
 	vector<Rect> returnrects;
 	vector<RectSize> rects(*(job->passed_rects));
 	bin.Init(job->w, job->h);
-	MaxRectsBinPack::FreeRectChoiceHeuristic heuristic = MaxRectsBinPack::RectBestShortSideFit;
-	bin.Insert(rects, returnrects, heuristic);
+	bin.Insert(rects, returnrects, job->heuristic);
 
 	// if all rects could be inserted and we're better than before:
 	if (rects.empty()) {
