@@ -62,6 +62,7 @@ def parseAnimationFile(fname, imgname):
     animation.close()
 
     additionalinformation = {}
+    additionalinformation["original_image_size"] = img.size
 
     firstsection = True
     newsection = False
@@ -69,33 +70,33 @@ def parseAnimationFile(fname, imgname):
     active_frame = None
     for line in lines:
         if line.startswith("image="):
-            imgname=line.split("=")[1] # keep this information to write out again!
-            additionalinformation["imagename"]=imgname
+            imgname = line.split("=")[1] # keep this information to write out again!
+            additionalinformation["imagename"] = imgname
 
         if line.startswith("render_size"):
-            value=line.split("=")[1]
-            render_size_x=int(value.split(",")[0])
-            render_size_y=int(value.split(",")[1])
+            value = line.split("=")[1]
+            render_size_x = int(value.split(",")[0])
+            render_size_y = int(value.split(",")[1])
 
         if line.startswith("render_offset"):
             value = line.split("=")[1]
-            render_offset_x=int(value.split(",")[0])
-            render_offset_y=int(value.split(",")[1])
+            render_offset_x = int(value.split(",")[0])
+            render_offset_y = int(value.split(",")[1])
 
         if line.startswith("position"):
-            position=int(line.split("=")[1])
+            position = int(line.split("=")[1])
 
         if line.startswith("frames"):
-            frames=int(line.split("=")[1])
+            frames = int(line.split("=")[1])
 
         if line.startswith("duration"):
-            duration=int(line.split("=")[1])
+            duration = int(line.split("=")[1])
 
         if line.startswith("type"):
-            _type=line.split("=")[1].strip()
+            _type = line.split("=")[1].strip()
 
         if line.startswith("active_frame"):
-            active_frame=line.split("=")[1].strip()
+            active_frame = line.split("=")[1].strip()
 
         if line.startswith("frame="):
             compressedloading = True;
@@ -230,9 +231,14 @@ def matchRects(newrects, images):
 
     return images
 
+def calculateImageSize(images):
+    w, h = 0, 0
+    for n in images:
+        w = max(n["x"] + n["image"].size[0], w)
+        h = max(n["y"] + n["image"].size[1], h)
+    return (w, h)
 
-
-def writeImageFile(imgname, images):
+def writeImageFile(imgname, images, size):
     def getpathfromsplit(spl):
         out_str = ''
         for num in xrange(len(spl)-1):
@@ -240,16 +246,11 @@ def writeImageFile(imgname, images):
         out_str += spl[-1]
         return out_str
 
-    w, h = 0, 0
-    for n in images:
-        w = max(n["x"] + n["image"].size[0], w)
-        h = max(n["y"] + n["image"].size[1], h)
-
     # write actual image:
-    result = Image.new('RGBA', (w,h), (0, 0, 0, 0))
+    result = Image.new('RGBA', size, (0, 0, 0, 0))
     for r in images:
-        assert (r["x"] + r["image"].size[0] <= w)
-        assert (r["y"] + r["image"].size[1] <= h)
+        assert (r["x"] + r["image"].size[0] <= size[0])
+        assert (r["y"] + r["image"].size[1] <= size[1])
         result.paste(r["image"], (r["x"], r["y"]))
     result.save(imgname, option = 'optimize')
 

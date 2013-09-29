@@ -5,19 +5,21 @@ import argparse
 import flareSpriteSheetPacking
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Shrink animations definition file and image.')
+    parser = argparse.ArgumentParser(description = 'Shrink animations definition file and image.')
 
-    parser.add_argument('--image', metavar='path', type=type(""), nargs=1,
-               help='path to the image files.', dest='image')
+    parser.add_argument('--image', help = 'path to the image files.', dest = 'image',
+                metavar = 'path', type = type(""), nargs = 1, required = True)
 
-    parser.add_argument('--definition', metavar='path', type=type(""), nargs=1,
-               help='path to a definition file.', dest='definition')
+    parser.add_argument('--definition', help = 'path to a definition file.', dest = 'definition',
+                metavar = 'path', type = type(""), nargs = 1, required = True)
 
-    parser.add_argument('--resize', action='store_true', default = False)
+    parser.add_argument('--resize', action = 'store_true', default = False)
+
+    parser.add_argument('--save-always', dest = "save_always", action = 'store_true', default = False)
 
     args = parser.parse_args()
     if args.image is None or args.definition is None:
-        print "At least one definition and one image must be supplied."
+        print "One definition and one image must be supplied."
         exit(1)
     else:
         animname = args.definition[0]
@@ -33,5 +35,9 @@ if __name__ == "__main__":
         newrects = flareSpriteSheetPacking.findBestEnclosingRectangle(rects)
         imgrects = flareSpriteSheetPacking.matchRects(newrects, imgrects)
 
-        flareSpriteSheetPacking.writeImageFile(imgname, imgrects)
-        flareSpriteSheetPacking.writeAnimationfile(animname, imgrects, additionalinformation)
+        size = flareSpriteSheetPacking.calculateImageSize(imgrects)
+        oldsize = additionalinformation["original_image_size"]
+
+        if args.save_always or (size[0] * size[1] < oldsize[0] * oldsize[1]):
+            flareSpriteSheetPacking.writeImageFile(imgname, imgrects, size)
+            flareSpriteSheetPacking.writeAnimationfile(animname, imgrects, additionalinformation)
