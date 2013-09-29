@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# This is just a library file for the spritesheetpacker.py executable
 
 import Image
 import ImageChops
@@ -13,7 +14,7 @@ import sha
 import numpy as np
 
 try:
-    os.nice(20)
+    os.nice(15)
 except:
     print "not able to be nice!"
 
@@ -144,133 +145,6 @@ def parseAnimationFile(fname, imgname):
         images += processNextSection()
     return images, additionalinformation
 
-def getpathfromsplit(spl):
-    out_str = ''
-    for num in xrange(len(spl)-1):
-        out_str += spl[num]+"/"
-    out_str+=spl[-1]
-    return out_str
-
-def ensure_dir(f):
-    d = os.path.dirname(f)
-    if not os.path.exists(d):
-        os.makedirs(d)
-
-def writeImageFile(imgname, images):
-    w, h = 0, 0
-    for n in images:
-        w = max(n["x"]+n["image"].size[0], w)
-        h = max(n["y"]+n["image"].size[1], h)
-
-    # write actual image:
-    result = Image.new('RGBA', (w,h), (0, 0, 0, 0))
-    for r in images:
-        assert (r["x"]+ r["image"].size[0] <=w)
-        assert (r["y"]+ r["image"].size[1] <=h)
-        result.paste(r["image"], (r["x"], r["y"]))
-    result.save(imgname, option='optimize')
-
-    splitup = imgname.split("/")
-    splitup.insert(-1, "noalpha")
-    path=getpathfromsplit(splitup)
-    ensure_dir(path)
-
-    orig_color=(0,0,0,0)
-    replacement_color=(255,0,255,255)
-    arr = np.array(np.asarray(result))
-    mask=np.logical_and.reduce([(arr[:,:,i]==orig_color[i]) for i in range(4)])
-    for i in range(4):
-        arr[mask,i]=replacement_color[i]
-    img = Image.fromarray(arr,mode='RGBA')
-    img = img.convert("RGB")
-    img.save(path, option='optimize')
-
-
-def writeAnimationfile(animname, images, additionalinformation):
-    w, h = 0, 0
-    for n in images:
-        w = max(n["x"]+n["image"].size[0], w)
-        h = max(n["y"]+n["image"].size[1], h)
-
-    def write_section(name):
-        framelist = filter(lambda s: s["name"] == name, images)
-        f.write("\n")
-        f.write("["+name+"]\n")
-        if len(framelist)>0:
-            f.write("frames="+str(framelist[0]["frames"])+"\n")
-            f.write("duration="+str(framelist[0]["duration"])+"\n")
-            f.write("type="+str(framelist[0]["type"])+"\n")
-            if framelist[0]["active_frame"]:
-                f.write("active_frame="+str(framelist[0]["active_frame"])+"\n")
-            for x in framelist:
-                #frame=index,direction,x,y,w,h,offsetx,offsety
-                f.write("frame="+str(x["index"])+","+str(x["direction"])+","+str(x["x"])+","+str(x["y"])+","+str(x["image"].size[0])+","+str(x["image"].size[1])+","+str(x["renderoffset"][0])+","+str(x["renderoffset"][1])+"\n")
-        else:
-            f.write("frames=1\n")
-            f.write("duration=1\n")
-            f.write("type=back_forth\n")
-
-    firstsection=additionalinformation["firstsection"]
-    sectionnames = {}
-    for f in images:
-        sectionnames[f["name"]] = True
-    if firstsection in sectionnames:
-        del sectionnames[firstsection]
-
-    f = open(animname,'w')
-
-    if "imagename" in additionalinformation:
-        f.write("\n")
-        f.write("image="+additionalinformation["imagename"])
-        #f.write("\n")
-
-    write_section(firstsection)
-    for section in sectionnames:
-        write_section(section)
-    f.close()
-
-def extractRects(images):
-    """returns an array of dicts having only width, height and index.
-    The index describes the position in the passed array"""
-    ret=[]
-    for xindex, x in enumerate(images):
-        if not "isequalto" in x:
-            r={"width":x["image"].size[0], "height":x["image"].size[1], "index":xindex, "gid":x["gid"]}
-            ret +=[r]
-    return ret
-
-def matchRects(newrects, images):
-    for r in newrects:
-        index = r["index"]
-        images[index]["x"] = r["x"]
-        images[index]["y"] = r["y"]
-        #assert(images[index]["width"] == r["width"])
-        #assert(images[index]["height"] == r["height"])
-    for im in images:
-        if "isequalto" in im:
-            im["x"] = images[im["isequalto"]]["x"]
-            im["y"] = images[im["isequalto"]]["y"]
-
-    return images
-
-def findBestEnclosingRectangle(rects):
-    rectPassString="" # passed to rectpacker
-    for rect in sorted(rects, key=lambda x: x["index"]):
-        rectPassString += " " + str(rect["width"]) + " " + str(rect["height"])
-
-    tf = tempfile.mkstemp()
-    string = "../bestEnclosingRect/rectpacker " + rectPassString
-    p = subprocess.call(string, stdout = tf[0], shell = True)
-
-    filehandle = open(tf[1], 'r')
-    positions = filehandle.readlines()
-    filehandle.close()
-
-    for pos, rect in zip(positions, rects):
-        rect["x"]=int(pos.split()[0])
-        rect["y"]=int(pos.split()[1])
-    return rects
-
 def markDuplicates(images):
     # assign global unique ids to each image:
     gid=0
@@ -300,6 +174,151 @@ def markDuplicates(images):
                 del im["isequalto"]
 
     return images
+
+def resizeImages(imgs):
+    for index, img in enumerate(imgs):
+        imag = img["image"].load()
+        for y in xrange(img["image"].size[1]):
+            for x in xrange(img["image"].size[0]):
+                if imag[x, y] == (255, 0, 255, 0):
+                    imag[x, y] = (0, 0, 0, 0)
+
+        newsize = (img["image"].size[0]/2, img["image"].size[1]/2)
+        imgs[index]["image"] = img["image"].resize(newsize, Image.BICUBIC)
+        imgs[index]["renderoffset"] = (imgs[index]["renderoffset"][0]/2, imgs[index]["renderoffset"][1]/2)
+    return imgs
+
+def extractRects(images):
+    """returns an array of dicts having only width, height and index.
+    The index describes the position in the passed array"""
+    ret = []
+    for xindex, x in enumerate(images):
+        if not "isequalto" in x:
+            r = {"width" : x["image"].size[0], "height" : x["image"].size[1], "index" : xindex, "gid" : x["gid"]}
+            ret += [r]
+    return ret
+
+def findBestEnclosingRectangle(rects):
+    rectPassString = ""
+    for rect in sorted(rects, key = lambda x: x["index"]):
+        rectPassString += " " + str(rect["width"]) + " " + str(rect["height"])
+
+    tf = tempfile.mkstemp()
+    string = "../bestEnclosingRect/rectpacker " + rectPassString
+    p = subprocess.call(string, stdout = tf[0], shell = True)
+
+    filehandle = open(tf[1], 'r')
+    positions = filehandle.readlines()
+    filehandle.close()
+
+    for pos, rect in zip(positions, rects):
+        rect["x"] = int(pos.split()[0])
+        rect["y"] = int(pos.split()[1])
+    return rects
+
+def matchRects(newrects, images):
+    for r in newrects:
+        index = r["index"]
+        images[index]["x"] = r["x"]
+        images[index]["y"] = r["y"]
+        #assert(images[index]["width"] == r["width"])
+        #assert(images[index]["height"] == r["height"])
+    for im in images:
+        if "isequalto" in im:
+            im["x"] = images[im["isequalto"]]["x"]
+            im["y"] = images[im["isequalto"]]["y"]
+
+    return images
+
+
+
+def writeImageFile(imgname, images):
+    def getpathfromsplit(spl):
+        out_str = ''
+        for num in xrange(len(spl)-1):
+            out_str += spl[num] + "/"
+        out_str += spl[-1]
+        return out_str
+
+    w, h = 0, 0
+    for n in images:
+        w = max(n["x"] + n["image"].size[0], w)
+        h = max(n["y"] + n["image"].size[1], h)
+
+    # write actual image:
+    result = Image.new('RGBA', (w,h), (0, 0, 0, 0))
+    for r in images:
+        assert (r["x"] + r["image"].size[0] <= w)
+        assert (r["y"] + r["image"].size[1] <= h)
+        result.paste(r["image"], (r["x"], r["y"]))
+    result.save(imgname, option = 'optimize')
+
+    splitup = imgname.split("/")
+    splitup.insert(-1, "noalpha")
+    path = getpathfromsplit(splitup)
+
+    d = os.path.dirname(path)
+    if not os.path.exists(d):
+        os.makedirs(d)()
+
+    orig_color = (0, 0, 0, 0)
+    replacement_color = (255, 0, 255, 255)
+    arr = np.array(np.asarray(result))
+    mask = np.logical_and.reduce([(arr[:,:,i] == orig_color[i]) for i in range(4)])
+    for i in range(4):
+        arr[mask,i] = replacement_color[i]
+    img = Image.fromarray(arr,mode = 'RGBA')
+    img = img.convert("RGB")
+    img.save(path, option = 'optimize')
+
+def writeAnimationfile(animname, images, additionalinformation):
+    w, h = 0, 0
+    for n in images:
+        w = max(n["x"]+n["image"].size[0], w)
+        h = max(n["y"]+n["image"].size[1], h)
+
+    def write_section(name):
+        framelist = filter(lambda s: s["name"] == name, images)
+        f.write("\n")
+        f.write("["+name+"]\n")
+        if len(framelist)>0:
+            f.write("frames="+str(framelist[0]["frames"])+"\n")
+            f.write("duration="+str(framelist[0]["duration"])+"\n")
+            f.write("type="+str(framelist[0]["type"])+"\n")
+            if framelist[0]["active_frame"]:
+                f.write("active_frame="+str(framelist[0]["active_frame"])+"\n")
+            for x in framelist:
+                #frame=index,direction,x,y,w,h,offsetx,offsety
+                f.write("frame=" + str(x["index"]) + "," + str(x["direction"]) + "," + str(x["x"]) + "," + str(x["y"]) + "," + str(x["image"].size[0]) + "," + str(x["image"].size[1]) + "," + str(x["renderoffset"][0]) + "," + str(x["renderoffset"][1]) + "\n")
+        else:
+            f.write("frames=1\n")
+            f.write("duration=1\n")
+            f.write("type=back_forth\n")
+
+    firstsection = additionalinformation["firstsection"]
+    sectionnames = {}
+    for f in images:
+        sectionnames[f["name"]] = True
+    if firstsection in sectionnames:
+        del sectionnames[firstsection]
+
+    f = open(animname,'w')
+
+    if "imagename" in additionalinformation:
+        f.write("\n")
+        f.write("image="+additionalinformation["imagename"])
+        #f.write("\n")
+
+    write_section(firstsection)
+    for section in sectionnames:
+        write_section(section)
+    f.close()
+
+
+if __name__ == "__main__":
+    print "This is just a library file containing lots of functions."
+    print "Run spritesheetpacker.py instead"
+
 
 
 
