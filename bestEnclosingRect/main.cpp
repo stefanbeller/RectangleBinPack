@@ -17,6 +17,7 @@
 #include <sys/wait.h>
 #include <iostream>
 #include <utility>
+#include <cmath>
 
 #include <pthread.h>
 
@@ -32,14 +33,14 @@ unsigned long maxEnclosingArea;
 
 const int maxTriesBinarySearch = 2048;
 
-// holds rectangles of equal size; each rectangle has width/height as a power of 2.
-// may only be changed if the mutex is hold.
-unsigned long constraint_rects_size = 0;
-vector<RectSize> constraint_rects;
+// may only be changed if the mutex is held.
+// the max length is the smallest power of 2, which is needed to form
+// a square in which we can use.
+unsigned int constraint_rects_max_length;
 sem_t constraint_rects_mutex;
 
 // holds the best solution found so far.
-// may only be changed if the mutex is hold.
+// may only be changed if the mutex is held.
 unsigned long best_rects_size = 0;
 vector<Rect> best_rects;
 sem_t best_rects_mutex;
@@ -50,20 +51,20 @@ struct WorkerJob {
 	unsigned int w;
 	unsigned int h;
 	sem_t *postOnFound;
-	bool updateConstraintsRect;
+	bool updatePowerOf2Constraints;
 	MaxRectsBinPack::FreeRectChoiceHeuristic heuristic;
 	WorkerJob(
 		vector<RectSize> *passed_rects_,
 		unsigned int w_,
 		unsigned int h_,
 		sem_t *postOnFound_,
-		bool updateConstraintsRect_,
+		bool updatePowerOf2Constraints_,
 		MaxRectsBinPack::FreeRectChoiceHeuristic _heuristic = MaxRectsBinPack::RectBestShortSideFit)
 			: passed_rects(passed_rects_)
 			, w(w_)
 			, h(h_)
 			, postOnFound(postOnFound_)
-			, updateConstraintsRect(updateConstraintsRect_)
+			, updatePowerOf2Constraints(updatePowerOf2Constraints_)
 			, heuristic(_heuristic)
 	{}
 };
@@ -79,7 +80,7 @@ void calculateBoundaries(vector<RectSize> rects) {
 		minEnclosingArea += it->height*it->width;
 	}
 	maxEnclosingArea = rects.size() * maxSmallRectHeight * maxSmallRectWidth;
-	best_rects_size = 2 * maxEnclosingArea;
+	best_rects_size = maxEnclosingArea;
 }
 
 /// Round up to next higher power of 2 (return x if it's already a power
@@ -118,18 +119,12 @@ void checkArea(void *args)
 			sem_post(&best_rects_mutex);
 		}
 		if (job->postOnFound) sem_post(job->postOnFound);
-		if (job->updateConstraintsRect) {
+		if (job->updatePowerOf2Constraints) {
 			sem_wait(&constraint_rects_mutex);
-			if (mysize < constraint_rects_size) {
-				constraint_rects_size = mysize;
-				constraint_rects.clear();
-			}
-			if (mysize == constraint_rects_size) {
-				RectSize r;
-				r.width = job->w;
-				r.height = job->h;
-				constraint_rects.push_back(r);
-			}
+
+			if (job->w < constraint_rects_max_length)
+				constraint_rects_max_length = job->w;
+
 			sem_post(&constraint_rects_mutex);
 		}
 	}
@@ -143,20 +138,15 @@ bool checkAreaSizeExhaustive(vector<RectSize> &passed_rects, unsigned long area)
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
 
-	for (size_t i = 0; i < constraint_rects.size(); ++i) {
-		RectSize r = constraint_rects[i];
-		unsigned int maxEnclosingWidth = r.width;
-		unsigned int maxEnclosingHeight = r.height;
-		for (unsigned int w = maxSmallRectWidth, end = maxEnclosingWidth; w < end; w++) {
-			unsigned int h = min(static_cast<unsigned int>(area / w), maxEnclosingHeight);
-			assert (w <= maxEnclosingWidth || h <= maxEnclosingHeight);
+	for (unsigned int w = maxSmallRectWidth, end = constraint_rects_max_length; w < end; w++) {
+		unsigned int h = min(static_cast<unsigned int>(area / w), constraint_rects_max_length);
+		assert (w <= constraint_rects_max_length || h <= constraint_rects_max_length);
 
-			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestShortSideFit));
-			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestLongSideFit));
-			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestAreaFit));
-			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBottomLeftRule));
-			workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectContactPointRule));
-		}
+		workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestShortSideFit));
+		workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestLongSideFit));
+		workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBestAreaFit));
+		workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectBottomLeftRule));
+		workDispatcher->addTask(new WorkerJob(&passed_rects, w, h, &fitFounds, false, MaxRectsBinPack::RectContactPointRule));
 	}
 
 	delete workDispatcher;
@@ -174,10 +164,8 @@ bool checkAreaSizeFast(vector<RectSize> &passed_rects, unsigned long area, int m
 
 	int yetToStart = maxTries;
 	while (yetToStart > 0) {
-		unsigned int constraint_rects_index = rand() % constraint_rects.size();
-		RectSize r = constraint_rects[constraint_rects_index];
-		unsigned int maxEnclosingWidth = r.width;
-		unsigned int maxEnclosingHeight = r.height;
+		unsigned int maxEnclosingWidth = constraint_rects_max_length;
+		unsigned int maxEnclosingHeight = constraint_rects_max_length;
 
 		int minWidth = maxSmallRectWidth;
 		int maxWidth = maxEnclosingWidth;
@@ -209,22 +197,23 @@ void checkAreaSizePowersOf2(vector<RectSize> &passed_rects) {
 
 	sem_t fitFounds;
 	sem_init(&fitFounds, 0, 0);
-	constraint_rects_size = 4 * maxEnclosingArea;
+	constraint_rects_max_length = pow2roundup(passed_rects.size() * std::max(maxSmallRectWidth, maxSmallRectHeight));
 
-	for (unsigned int w = pow2roundup(maxSmallRectWidth); w <= 2 * maxEnclosingArea / maxSmallRectHeight; w*=2) {
-		for (unsigned int h = pow2roundup(maxSmallRectHeight); h <= 2 * maxEnclosingArea / maxSmallRectWidth; h*=2) {
-			if (w * h < minEnclosingArea) continue;
-			WorkerJob *t = new WorkerJob(&passed_rects, w, h, &fitFounds, true);
-			workDispatcher->addTask(t);
-		}
+	unsigned int minl = pow2roundup(std::max(maxSmallRectWidth, maxSmallRectHeight));
+	unsigned int maxl = pow2roundup(std::sqrt((double)maxEnclosingArea)) + 1;
+	for (unsigned int l = minl; l <= maxl && l < constraint_rects_max_length; l *= 2) {
+		if (l * l < minEnclosingArea)
+			continue;
+
+		WorkerJob *t = new WorkerJob(&passed_rects, l, l, &fitFounds, true);
+		workDispatcher->addTask(t);
 	}
 
 	delete workDispatcher;
-	assert(constraint_rects.size() > 0);
 }
 
 void binarySearch(vector<RectSize> &rects) {
-	unsigned long upper = min((unsigned long)(constraint_rects_size),(unsigned long)maxEnclosingArea);
+	unsigned long upper = maxEnclosingArea;
 	unsigned long lower = minEnclosingArea;
 
 	while (upper - lower > 1) {
