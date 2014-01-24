@@ -41,7 +41,7 @@ sem_t constraint_rects_mutex;
 
 // holds the best solution found so far.
 // may only be changed if the mutex is held.
-unsigned long best_rects_size = 0;
+unsigned long best_rects_size;
 vector<Rect> best_rects;
 sem_t best_rects_mutex;
 
@@ -80,7 +80,7 @@ void calculateBoundaries(vector<RectSize> rects) {
 		minEnclosingArea += it->height*it->width;
 	}
 	maxEnclosingArea = rects.size() * maxSmallRectHeight * maxSmallRectWidth;
-	best_rects_size = maxEnclosingArea;
+	best_rects_size = maxEnclosingArea + 1;
 }
 
 /// Round up to next higher power of 2 (return x if it's already a power
