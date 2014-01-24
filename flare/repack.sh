@@ -7,9 +7,15 @@ do
         do
             echo $animfile
             suffixtxt=$(echo "$animfile" |tr '/' ' ' |awk '$1=$2=$3=$4=$5=$6=""; {print $0} '|tr ' ' '/')
-            suffixpng=$(echo "$animfile" |tr '/' ' ' |awk '$1=$2=$3=$4=$5=$6=""; {print $0} '|tr ' ' '/'|sed 's,.txt$,.png,')
+            suffixpng=$(echo "$animfile" |tr '/' ' ' |awk '$1=$2=$3=$4=$5=$6=""; {print $0} '|tr ' ' '/'|cut --characters=7-|sed 's,.txt$,.png,')
 
             ./spritesheetpacker.py --definition ../../flare-game/mods/${mod}/animations/${suffixtxt} --image ../../flare-game/mods/${mod}/images/${suffixpng}
+
+            {
+				cd ../../flare-game
+				git commit -a -m "repack $suffixpng"
+				cd -
+			}
         done
     else
         echo "$mod has no animations folder"
