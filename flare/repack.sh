@@ -1,7 +1,20 @@
 #!/bin/bash
 
-if [[ ! -z $mods || ! -z game_dir ]] ; then
-	echo "Please define the variables mods and game_dir before running this script"
+echo $mods
+echo $game_dir
+
+abort=""
+if [ -z "$mods" ]  ; then
+	echo "Please define the variable mods before running this script"
+	abort="yes"
+fi
+
+if [ -z "$game_dir" ] ; then
+	echo "Please define the variable game_dir before running this script"
+	abort="yes"
+fi
+
+if [ -n "$abort" ] ; then
 	exit 1
 fi
 
