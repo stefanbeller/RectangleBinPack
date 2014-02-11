@@ -27,7 +27,7 @@ do
 			suffixtxt=$(echo "$animfile" |tr '/' ' ' |awk '$1=$2=$3=$4=$5=$6=""; {print $0} '|tr ' ' '/')
 			suffixpng=$(echo "$animfile" |tr '/' ' ' |awk '$1=$2=$3=$4=$5=$6=""; {print $0} '|tr ' ' '/' | tr -s "/"|cut --characters=2-|sed 's,.txt$,.png,')
 
-			./spritesheetpacker.py --definition ${game_dir}/mods/${mod}/animations/${suffixtxt} --image ${game_dir}/mods/${mod}/images/${suffixpng}
+			./spritesheetpacker.py --definition ${game_dir}/mods/${mod}/animations/${suffixtxt} --image ${game_dir}/mods/${mod}/images/${suffixpng} ${spritesheetpacker_args}
 
 			{
 				cd ${game_dir}
