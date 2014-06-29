@@ -10,7 +10,7 @@
 #include <unistd.h>
 #endif
 
-int getNumCores() {
+unsigned getNumCores() {
 #ifdef WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);

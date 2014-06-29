@@ -3,6 +3,6 @@
 #ifndef __NUMBER_OF_CORES__
 #define __NUMBER_OF_CORES__
 
-int getNumCores();
+unsigned getNumCores();
 
 #endif
