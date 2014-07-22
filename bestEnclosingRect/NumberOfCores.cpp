@@ -8,9 +8,10 @@
 #include <sys/sysctl.h>
 #else
 #include <unistd.h>
+#include <stdio.h>
 #endif
 
-unsigned getNumCores() {
+unsigned int getNumCores() {
 #ifdef WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
@@ -30,6 +31,11 @@ unsigned getNumCores() {
     }
     return count;
 #else
-    return sysconf(_SC_NPROCESSORS_ONLN);
+    int count = sysconf(_SC_NPROCESSORS_ONLN);
+    if (count < 1) {
+        fprintf(stderr, "Number of CPUs online reported %d. Using one core.\n", count);
+        count = 1;
+    }
+    return count;
 #endif
 }
