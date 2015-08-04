@@ -3,6 +3,8 @@
 ### 1. Inside of bestEnclosingRect folder run
 
     make
+When using Windows/MinGW32, it should be
+    mingw32-make
 
 This should produce rectpacker executable (under WIndows/MinGW it will have *.exe extension)
 
