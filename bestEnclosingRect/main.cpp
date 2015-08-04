@@ -14,7 +14,9 @@
 #include <vector>
 #include <algorithm>
 #include <semaphore.h>
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 #include <iostream>
 #include <utility>
 #include <cmath>
