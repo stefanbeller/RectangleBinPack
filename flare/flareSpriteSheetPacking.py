@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # This is just a library file for the spritesheetpacker.py executable
 
-import Image
-import ImageChops
+from PIL import Image
+from PIL import ImageChops
 import os
 import random
 import sys

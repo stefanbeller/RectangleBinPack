@@ -1,6 +1,7 @@
 #!/bin/bash
 
-game_dir=../../polymorphable
-mods="polymorphable"
+export game_dir=../../polymorphable
+export mods="polymorphable"
+export spritesheetpacker_args="--save-always";
 
-bash repack.sh
+bash ./repack.sh
