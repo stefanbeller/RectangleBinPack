@@ -90,7 +90,7 @@ def parseAnimationFile(fname, imgname):
             frames = int(line.split("=")[1])
 
         if line.startswith("duration"):
-            duration = int(line.split("=")[1])
+            duration = line.split("=")[1].strip()
 
         if line.startswith("type"):
             _type = line.split("=")[1].strip()
@@ -205,7 +205,10 @@ def findBestEnclosingRectangle(rects):
         rectPassString += " " + str(rect["width"]) + " " + str(rect["height"])
 
     tf = tempfile.mkstemp()
-    string = "../bestEnclosingRect/rectpacker " + rectPassString
+    if 'win' in sys.platform:
+        string = "..\\bestEnclosingRect\\rectpacker.exe " + rectPassString
+    elif sys.platform.startswith('linux'):
+        string = "../bestEnclosingRect/rectpacker " + rectPassString
     p = subprocess.call(string, stdout = tf[0], shell = True)
 
     filehandle = open(tf[1], 'r')
@@ -239,38 +242,12 @@ def calculateImageSize(images):
     return (w, h)
 
 def writeImageFile(imgname, images, size):
-    def getpathfromsplit(spl):
-        out_str = ''
-        for num in xrange(len(spl)-1):
-            out_str += spl[num] + "/"
-        out_str += spl[-1]
-        return out_str
-
-    # write actual image:
     result = Image.new('RGBA', size, (0, 0, 0, 0))
     for r in images:
         assert (r["x"] + r["image"].size[0] <= size[0])
         assert (r["y"] + r["image"].size[1] <= size[1])
         result.paste(r["image"], (r["x"], r["y"]))
     result.save(imgname, option = 'optimize')
-
-    splitup = imgname.split("/")
-    splitup.insert(-1, "noalpha")
-    path = getpathfromsplit(splitup)
-
-    d = os.path.dirname(path)
-    if not os.path.exists(d):
-        os.makedirs(d)()
-
-    orig_color = (0, 0, 0, 0)
-    replacement_color = (255, 0, 255, 255)
-    arr = np.array(np.asarray(result))
-    mask = np.logical_and.reduce([(arr[:,:,i] == orig_color[i]) for i in range(4)])
-    for i in range(4):
-        arr[mask,i] = replacement_color[i]
-    img = Image.fromarray(arr,mode = 'RGBA')
-    img = img.convert("RGB")
-    img.save(path, option = 'optimize')
 
 def writeAnimationfile(animname, images, additionalinformation):
     w, h = 0, 0
@@ -293,7 +270,7 @@ def writeAnimationfile(animname, images, additionalinformation):
                 f.write("frame=" + str(x["index"]) + "," + str(x["direction"]) + "," + str(x["x"]) + "," + str(x["y"]) + "," + str(x["image"].size[0]) + "," + str(x["image"].size[1]) + "," + str(x["renderoffset"][0]) + "," + str(x["renderoffset"][1]) + "\n")
         else:
             f.write("frames=1\n")
-            f.write("duration=1\n")
+            f.write("duration=1s\n")
             f.write("type=back_forth\n")
 
     firstsection = additionalinformation["firstsection"]
