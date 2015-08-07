@@ -7,9 +7,6 @@ import flareSpriteSheetPacking
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Shrink animations definition file and image.')
 
-    parser.add_argument('--image', help = 'path to the image files.', dest = 'image',
-                metavar = 'path', type = type(""), nargs = 1, required = True)
-
     parser.add_argument('--definition', help = 'path to a definition file.', dest = 'definition',
                 metavar = 'path', type = type(""), nargs = 1, required = True)
 
@@ -23,7 +20,14 @@ if __name__ == "__main__":
         exit(1)
     else:
         animname = args.definition[0]
-        imgname = args.image[0]
+        imgname = None
+        with f as open(animname):
+            for line in f.readlines():
+                if line.startswith('image='):
+                    imgname=line.split('=')[1]
+        if imgname == None:
+            print 'No image path found in the spritesheet definition'
+            exit(1)
         imgrects, additionalinformation = flareSpriteSheetPacking.parseAnimationFile(animname, imgname)
 
         imgs = flareSpriteSheetPacking.markDuplicates(imgrects)
