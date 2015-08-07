@@ -31,7 +31,7 @@ exit /b 0
 FOR /R %game_dir%\mods\%1\animations\enemies %%A IN (*.txt) DO (
 	call :pack %1 %%A
 	pushd %game_dir%
-	git commit -a -m "repack spritesheets"
+	git commit -a -m "repack %%~nA.png"
 	popd
 )
 GOTO :eof
