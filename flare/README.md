@@ -1,5 +1,7 @@
 ## Flare SpriteSheet Packing
 
+### 0. Code in this directory is licensed under GPLv2
+
 ### 1. Inside of bestEnclosingRect folder run
 
     make
