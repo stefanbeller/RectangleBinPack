@@ -25,13 +25,12 @@ do
 		do
 			echo $animfile
 			suffixtxt=$(echo "$animfile" |tr '/' ' ' |awk '$1=$2=$3=$4=$5=$6=""; {print $0} '|tr ' ' '/')
-			suffixpng=$(echo "$animfile" |tr '/' ' ' |awk '$1=$2=$3=$4=$5=$6=""; {print $0} '|tr ' ' '/' | tr -s "/"|cut --characters=2-|sed 's,.txt$,.png,')
 
-			./spritesheetpacker.py --definition ${game_dir}/mods/${mod}/animations/${suffixtxt} --image ${game_dir}/mods/${mod}/images/${suffixpng} ${spritesheetpacker_args}
+			./spritesheetpacker.py --definition ${game_dir}/mods/${mod}/animations/${suffixtxt} --mod ${game_dir}/mods/${mod} ${spritesheetpacker_args}
 
 			{
 				cd ${game_dir}
-				git commit -a -m "repack $suffixpng"
+				git commit -a -m "repack image for $suffixtxt"
 				cd -
 			}
 		done

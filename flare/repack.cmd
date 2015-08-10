@@ -18,7 +18,7 @@ echo %mods%
 echo %game_dir%
 
 FOR %%M IN (%mods%) DO (
-	if EXIST %game_dir%\mods\%%M\animations\enemies (
+	if EXIST %game_dir%\mods\%%M\animations (
 		call :process %%M
 	) else (
 		echo %%M has no animations folder
@@ -28,10 +28,10 @@ FOR %%M IN (%mods%) DO (
 exit /b 0
 
 :process
-FOR /R %game_dir%\mods\%1\animations\enemies %%A IN (*.txt) DO (
+FOR /R %game_dir%\mods\%1\animations %%A IN (*.txt) DO (
 	call :pack %1 %%A
 	pushd %game_dir%
-	git commit -a -m "repack %%~nA.png"
+	git commit -a -m "repack image for %%~nA.txt"
 	popd
 )
 GOTO :eof
@@ -41,5 +41,5 @@ SET mod=%1
 SET animationFile=%2
 SET basename=%~n2
 
-spritesheetpacker.py --definition %animationFile% --image %game_dir%\mods\%mod%\images\enemies\%basename%.png %spritesheetpacker_args%
+spritesheetpacker.py --definition %animationFile% --mod %game_dir%\mods\%mod% %spritesheetpacker_args%
 GOTO :eof

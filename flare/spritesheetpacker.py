@@ -7,6 +7,9 @@ import flareSpriteSheetPacking
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Shrink animations definition file and image.')
 
+    parser.add_argument('--mod', help = 'path to mod folder.', dest = 'mod',
+                metavar = 'path', type = type(""), nargs = 1, required = True)
+
     parser.add_argument('--definition', help = 'path to a definition file.', dest = 'definition',
                 metavar = 'path', type = type(""), nargs = 1, required = True)
 
@@ -15,16 +18,17 @@ if __name__ == "__main__":
     parser.add_argument('--save-always', dest = "save_always", action = 'store_true', default = False)
 
     args = parser.parse_args()
-    if args.image is None or args.definition is None:
-        print "One definition and one image must be supplied."
+    if args.mod is None or args.definition is None:
+        print "Definition and mod path must be supplied."
         exit(1)
     else:
+        mod = args.mod[0]
         animname = args.definition[0]
         imgname = None
-        with f as open(animname):
+        with open(animname) as f:
             for line in f.readlines():
                 if line.startswith('image='):
-                    imgname=line.split('=')[1]
+                    imgname=mod + '/' + (line.split('=')[1]).rstrip('\n')
         if imgname == None:
             print 'No image path found in the spritesheet definition'
             exit(1)
