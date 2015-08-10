@@ -21,9 +21,12 @@ except:
 def parseAnimationFile(fname, imgname):
     images = []
     img = Image.open(imgname)
+    print 'processing ', imgname
 
     def processNextSection():
         images = []
+        if 'position' not in globals():
+            print "Error: image detected as not compressed but has no position\n"
         for index in range(0, frames):
             for direction in range(0,8):
                 x = (position + index) * render_size_x
@@ -36,9 +39,9 @@ def parseAnimationFile(fname, imgname):
                 newimg = partimg.crop(bbox)
 
                 if bbox is None:
-                    print imgname
-                    print "skipping empty image at ",(x, y, w, h)
-                    print "position / direction is ",position, direction
+                    print "Warning in: ",imgname.strip('\n')
+                    print "* skipping empty image at ",(x, y, w, h)
+                    print "* position / direction is ",position, direction, '\n'
                 else:
                     f = {
                         "name" : sectionname,
@@ -115,9 +118,9 @@ def parseAnimationFile(fname, imgname):
             newimg = partimg.crop(bbox)
 
             if bbox is None:
-                print imgname
-                print "skipping empty image at ",(x, y, w, h)
-                print "direction is ", direction
+                print "Warning in: ",imgname.strip('\n')
+                print "* skipping empty image at ",(x, y, w, h)
+                print "* direction is ", direction, '\n'
             else:
                 f = {
                     "name" : sectionname,
@@ -247,6 +250,7 @@ def writeImageFile(imgname, images, size):
         assert (r["x"] + r["image"].size[0] <= size[0])
         assert (r["y"] + r["image"].size[1] <= size[1])
         result.paste(r["image"], (r["x"], r["y"]))
+    print 'Saving: ',imgname
     result.save(imgname, option = 'optimize')
 
 def writeAnimationfile(animname, images, additionalinformation):

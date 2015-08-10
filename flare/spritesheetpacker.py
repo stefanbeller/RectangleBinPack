@@ -30,7 +30,7 @@ if __name__ == "__main__":
                 if line.startswith('image='):
                     imgname=mod + '/' + (line.split('=')[1]).rstrip('\n')
         if imgname == None:
-            print 'No image path found in the spritesheet definition'
+            print 'No image path found in the spritesheet definition:', animname
             exit(1)
         imgrects, additionalinformation = flareSpriteSheetPacking.parseAnimationFile(animname, imgname)
 
